@@ -3,6 +3,7 @@ let cookies = 0;
 const upgrades = {
     snail: {
         amount: 0,
+        basePrice: 10,
         price: 10,
         cps: 1,
         dom: {
@@ -13,6 +14,7 @@ const upgrades = {
     },
     elephant: {
         amount: 0,
+        basePrice: 100,
         price: 100,
         cps: 10,
         dom: {
@@ -23,56 +25,58 @@ const upgrades = {
     }
 };
 
-const cookieBtn = document.getElementById('cookie');
-const cookieDisplay = document.getElementById('cookie-count');
-const cpsDisplay = document.getElementById('cps-count');
+const dom = {
+    cookieBtn: document.getElementById('cookie'),
+    cookieDisplay: document.getElementById('cookie-count'),
+    cpsDisplay: document.getElementById('cps-count'),
+    shopToggle: document.getElementById('shop-toggle'),
+    sidebar: document.querySelector('.sidebar')
+};
 
+const calculateTotalCPS = () => {
+    return Object.values(upgrades).reduce((acc, upg) => acc + (upg.amount * upg.cps), 0);
+};
 
 function updateUI() {
-    cookieDisplay.innerText = Math.floor(cookies).toLocaleString();
+    dom.cookieDisplay.innerText = Math.floor(cookies).toLocaleString();
+    dom.cpsDisplay.innerText = calculateTotalCPS().toLocaleString();
     
-    let totalCPS = 0;
-    for (let key in upgrades) {
-        let upg = upgrades[key];
-        totalCPS += upg.amount * upg.cps;
-        
+    for (const key in upgrades) {
+        const upg = upgrades[key];
         upg.dom.amount.innerText = upg.amount;
-        upg.dom.price.innerText = upg.price;
+        upg.dom.price.innerText = upg.price.toLocaleString();
         upg.dom.btn.disabled = cookies < upg.price;
     }
-    cpsDisplay.innerText = totalCPS;
 }
 
-cookieBtn.addEventListener('click', (e) => {
-    cookies += 1;
-    updateUI();
-});
-
-function setupUpgrade(key) {
+Object.keys(upgrades).forEach(key => {
     const upg = upgrades[key];
     upg.dom.btn.addEventListener('click', () => {
         if (cookies >= upg.price) {
             cookies -= upg.price;
             upg.amount++;
-            upg.price = Math.round(upg.price * 1.15);
+            upg.price = Math.round(upg.basePrice * Math.pow(1.15, upg.amount));
             updateUI();
         }
     });
-}
+});
 
-setupUpgrade('snail');
-setupUpgrade('elephant');
+dom.cookieBtn.addEventListener('click', () => {
+    cookies += 1;
+    updateUI();
+});
 
 setInterval(() => {
-    let totalCPS = 0;
-    for (let key in upgrades) {
-        totalCPS += upgrades[key].amount * upgrades[key].cps;
-    }
-    
+    const totalCPS = calculateTotalCPS();
     if (totalCPS > 0) {
         cookies += totalCPS;
         updateUI();
     }
 }, 1000);
+
+dom.shopToggle.addEventListener('click', () => {
+    const isOpen = dom.sidebar.classList.toggle('open');
+    dom.shopToggle.textContent = isOpen ? '❌ Schließen' : '🛒 Shop';
+});
 
 updateUI();
