@@ -1,51 +1,89 @@
-// --- Spiel-Status (State) ---
+// --- SPIEL-ZUSTAND ---
 let cookies = 0;
-let grandmas = 0;
-let grandmaPrice = 10;
 
-// --- DOM-Elemente ---
+const upgrades = {
+    snail: {
+        amount: 0,
+        price: 10,
+        cps: 1,
+        dom: {
+            btn: document.getElementById('buy-snail'),
+            price: document.getElementById('snail-price'),
+            amount: document.getElementById('snail-amount')
+        }
+    },
+    elephant: {
+        amount: 0,
+        price: 100,
+        cps: 10,
+        dom: {
+            btn: document.getElementById('buy-elephant'),
+            price: document.getElementById('elephant-price'),
+            amount: document.getElementById('elephant-amount')
+        }
+    }
+};
+
+// --- DOM ELEMENTE ---
+const cookieBtn = document.getElementById('cookie');
 const cookieDisplay = document.getElementById('cookie-count');
 const cpsDisplay = document.getElementById('cps-count');
-const priceDisplay = document.getElementById('price');
-const cookieBtn = document.getElementById('cookie');
-const buyBtn = document.getElementById('buy-grandma');
 
-// --- Funktionen ---
+// --- LOGIK ---
 
-// Aktualisiert alle Texte und Buttons auf der Seite
 function updateUI() {
-    cookieDisplay.innerText = Math.floor(cookies);
-    cpsDisplay.innerText = grandmas;
-    priceDisplay.innerText = grandmaPrice;
+    // Cookies anzeigen
+    cookieDisplay.innerText = Math.floor(cookies).toLocaleString();
     
-    // Button nur aktivieren, wenn genug Cookies da sind
-    buyBtn.disabled = cookies < grandmaPrice;
+    // CPS berechnen
+    let totalCPS = 0;
+    for (let key in upgrades) {
+        let upg = upgrades[key];
+        totalCPS += upg.amount * upg.cps;
+        
+        // Buttons & Texte im Shop
+        upg.dom.amount.innerText = upg.amount;
+        upg.dom.price.innerText = upg.price;
+        upg.dom.btn.disabled = cookies < upg.price;
+    }
+    cpsDisplay.innerText = totalCPS;
 }
 
-// Wenn auf den Keks geklickt wird
-cookieBtn.addEventListener('click', () => {
+// Klick auf den Keks
+cookieBtn.addEventListener('click', (e) => {
     cookies += 1;
     updateUI();
 });
 
-// Wenn ein Upgrade gekauft wird
-buyBtn.addEventListener('click', () => {
-    if (cookies >= grandmaPrice) {
-        cookies -= grandmaPrice;
-        grandmas += 1;
-        // Preis steigt um 50% pro Kauf
-        grandmaPrice = Math.round(grandmaPrice * 1.5); 
-        updateUI();
-    }
-});
+// Kauf-Funktion
+function setupUpgrade(key) {
+    const upg = upgrades[key];
+    upg.dom.btn.addEventListener('click', () => {
+        if (cookies >= upg.price) {
+            cookies -= upg.price;
+            upg.amount++;
+            upg.price = Math.round(upg.price * 1.15);
+            updateUI();
+        }
+    });
+}
 
-// Der "Game Loop" - läuft jede Sekunde
+// Event-Listener für alle Upgrades initialisieren
+setupUpgrade('snail');
+setupUpgrade('elephant');
+
+// Game Loop (Jede Sekunde)
 setInterval(() => {
-    if (grandmas > 0) {
-        cookies += grandmas;
+    let totalCPS = 0;
+    for (let key in upgrades) {
+        totalCPS += upgrades[key].amount * upgrades[key].cps;
+    }
+    
+    if (totalCPS > 0) {
+        cookies += totalCPS;
         updateUI();
     }
 }, 1000);
 
-// Initialer Aufruf beim Laden der Seite
+// Start-Update
 updateUI();
