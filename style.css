@@ -1,4 +1,3 @@
-/* Grund-Setup */
 * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
@@ -19,7 +18,6 @@ body {
     height: 100%;
 }
 
-/* Hauptbereich: Keks */
 .main-area {
     flex: 1;
     display: flex;
@@ -48,7 +46,6 @@ body {
     color: #8b4513;
 }
 
-/* RIESEN KEKS */
 #cookie {
     font-size: clamp(180px, 45vw, 350px);
     cursor: pointer;
@@ -60,7 +57,6 @@ body {
     transform: scale(0.92);
 }
 
-/* Seitenleiste / Shop */
 .sidebar {
     width: 350px;
     background-color: #3d2b1f;
@@ -79,7 +75,6 @@ body {
     padding-bottom: 10px;
 }
 
-/* Upgrade Karten */
 .upgrade-item {
     background-color: #5d4037;
     border-radius: 12px;
@@ -151,7 +146,6 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* MOBILE OPTIMIERUNG */
 @media (max-width: 800px) {
     body {
         flex-direction: column;

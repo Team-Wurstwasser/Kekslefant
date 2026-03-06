@@ -1,4 +1,3 @@
-// --- SPIEL-ZUSTAND ---
 let cookies = 0;
 
 const upgrades = {
@@ -24,24 +23,19 @@ const upgrades = {
     }
 };
 
-// --- DOM ELEMENTE ---
 const cookieBtn = document.getElementById('cookie');
 const cookieDisplay = document.getElementById('cookie-count');
 const cpsDisplay = document.getElementById('cps-count');
 
-// --- LOGIK ---
 
 function updateUI() {
-    // Cookies anzeigen
     cookieDisplay.innerText = Math.floor(cookies).toLocaleString();
     
-    // CPS berechnen
     let totalCPS = 0;
     for (let key in upgrades) {
         let upg = upgrades[key];
         totalCPS += upg.amount * upg.cps;
         
-        // Buttons & Texte im Shop
         upg.dom.amount.innerText = upg.amount;
         upg.dom.price.innerText = upg.price;
         upg.dom.btn.disabled = cookies < upg.price;
@@ -49,13 +43,11 @@ function updateUI() {
     cpsDisplay.innerText = totalCPS;
 }
 
-// Klick auf den Keks
 cookieBtn.addEventListener('click', (e) => {
     cookies += 1;
     updateUI();
 });
 
-// Kauf-Funktion
 function setupUpgrade(key) {
     const upg = upgrades[key];
     upg.dom.btn.addEventListener('click', () => {
@@ -68,11 +60,9 @@ function setupUpgrade(key) {
     });
 }
 
-// Event-Listener für alle Upgrades initialisieren
 setupUpgrade('snail');
 setupUpgrade('elephant');
 
-// Game Loop (Jede Sekunde)
 setInterval(() => {
     let totalCPS = 0;
     for (let key in upgrades) {
@@ -85,5 +75,4 @@ setInterval(() => {
     }
 }, 1000);
 
-// Start-Update
 updateUI();
