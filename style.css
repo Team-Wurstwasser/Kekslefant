@@ -23,8 +23,10 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-evenly;
+    justify-content: center;
     padding: 20px;
+    gap: 40px;
+    margin-top: 60px;
 }
 
 .stats {
@@ -147,10 +149,12 @@ button:disabled {
 }
 
 .header-container {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 100;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    padding: 5px;
+    border-radius: 10px;
 }
 
 .logo-link {
@@ -216,6 +220,9 @@ button:disabled {
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        padding: 20px;
+        box-sizing: border-box; 
+        padding-top: 100px;
     }
 
     .sidebar h2 {
@@ -223,5 +230,9 @@ button:disabled {
         justify-content: space-between;
         align-items: center;
         padding: 10px;
+    }
+
+    .logo-text {
+        display: none;
     }
 }
