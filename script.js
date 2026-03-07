@@ -1,7 +1,6 @@
 let state = {
     cookies: 0,
-    totalCPS: 0,
-    tickRate: 100
+    totalCPS: 0
 };
 
 const upgradeData = {
@@ -95,10 +94,10 @@ elements.shopToggle.addEventListener('click', () => {
 
 setInterval(() => {
     if (state.totalCPS > 0) {
-        state.cookies += (state.totalCPS / (1000 / state.tickRate));
+        state.cookies += state.totalCPS;
         updateUI();
     }
-}, state.tickRate);
+}, 1000);
 
 initShop();
 updateUI();
