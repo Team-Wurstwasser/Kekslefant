@@ -213,18 +213,6 @@ button:disabled {
         transform: translateX(0);
     }
 
-    .main-area {
-        height: 100vh;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        box-sizing: border-box; 
-        padding-top: 100px;
-    }
-
     .sidebar h2 {
         display: flex;
         justify-content: space-between;
@@ -235,4 +223,5 @@ button:disabled {
     .logo-text {
         display: none;
     }
+
 }
