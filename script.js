@@ -4,8 +4,20 @@ let state = {
 };
 
 const upgradeData = {
-    snail: { name: "Schnecken-Zucht", desc: "+1 Cookie/s", basePrice: 10, cps: 1, icon: "img/Schnecke.png" },
-    elephant: { name: "Elefanten-Fabrik", desc: "+10 Cookies/s", basePrice: 100, cps: 10, icon: "img/Elefant.png" }
+    snail: {
+        name: "Schnecken-Zucht", 
+        desc: "+1 Cookie/s", 
+        basePrice: 10, 
+        cps: 1, 
+        icon: "img/Schnecke.png" 
+        },
+    elephant: {
+        name: "Elefanten-Fabrik", 
+        desc: "+10 Cookies/s", 
+        basePrice: 100, 
+        cps: 10, 
+        icon: "img/Elefant.png" 
+    }
 };
 
 const upgrades = {};
