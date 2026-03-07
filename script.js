@@ -1,45 +1,65 @@
 let cookies = 0;
 
-const upgrades = {
-    snail: {
-        amount: 0,
-        basePrice: 10,
-        price: 10,
-        cps: 1,
-        dom: {
-            btn: document.getElementById('buy-snail'),
-            price: document.getElementById('snail-price'),
-            amount: document.getElementById('snail-amount')
-        }
-    },
-    elephant: {
-        amount: 0,
-        basePrice: 100,
-        price: 100,
-        cps: 10,
-        dom: {
-            btn: document.getElementById('buy-elephant'),
-            price: document.getElementById('elephant-price'),
-            amount: document.getElementById('elephant-amount')
-        }
+const upgradeData = {
+    snail: { name: "Schnecken-Zucht", desc: "+1 Cookie/s", basePrice: 10, cps: 1, icon: "img/Schnecke.png" },
+    elephant: { name: "Elefanten-Fabrik", desc: "+10 Cookies/s", basePrice: 100, cps: 10, icon: "img/Elefant.png" }
+};
+
+const upgrades = {};
+const sidebar = document.querySelector('.sidebar');
+const cookieBtn = document.getElementById('cookie');
+const cookieDisplay = document.getElementById('cookie-count');
+const cpsDisplay = document.getElementById('cps-count');
+const shopToggle = document.getElementById('shop-toggle');
+
+function initShop() {
+    for (const key in upgradeData) {
+        const data = upgradeData[key];
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'upgrade-item';
+        
+        itemDiv.innerHTML = `
+            <div class="upgrade-info">
+                <img src="${data.icon}" alt="${data.name}" class="upgrade-icon">
+                <div class="upgrade-texts">
+                    <span class="upgrade-name">${data.name}</span>
+                    <span class="upgrade-desc">${data.desc}</span>
+                </div>
+            </div>
+            <div class="upgrade-controls">
+                <span class="upgrade-amount" id="${key}-amount">0</span>
+                <button id="buy-${key}">Kaufen (<span id="${key}-price">${data.basePrice}</span> 🍪)</button>
+            </div>
+        `;
+        
+        sidebar.appendChild(itemDiv);
+
+        upgrades[key] = {
+            ...data,
+            amount: 0,
+            price: data.basePrice,
+            dom: {
+                btn: document.getElementById(`buy-${key}`),
+                price: document.getElementById(`${key}-price`),
+                amount: document.getElementById(`${key}-amount`)
+            }
+        };
+
+        upgrades[key].dom.btn.addEventListener('click', () => {
+            if (cookies >= upgrades[key].price) {
+                cookies -= upgrades[key].price;
+                upgrades[key].amount++;
+                upgrades[key].price = Math.round(upgrades[key].basePrice * Math.pow(1.15, upgrades[key].amount));
+                updateUI();
+            }
+        });
     }
-};
-
-const dom = {
-    cookieBtn: document.getElementById('cookie'),
-    cookieDisplay: document.getElementById('cookie-count'),
-    cpsDisplay: document.getElementById('cps-count'),
-    shopToggle: document.getElementById('shop-toggle'),
-    sidebar: document.querySelector('.sidebar')
-};
-
-const calculateTotalCPS = () => {
-    return Object.values(upgrades).reduce((acc, upg) => acc + (upg.amount * upg.cps), 0);
-};
+}
 
 function updateUI() {
-    dom.cookieDisplay.innerText = Math.floor(cookies).toLocaleString();
-    dom.cpsDisplay.innerText = calculateTotalCPS().toLocaleString();
+    cookieDisplay.innerText = Math.floor(cookies).toLocaleString();
+    const totalCPS = Object.values(upgrades).reduce((acc, upg) => acc + (upg.amount * upg.cps), 0);
+    cpsDisplay.innerText = totalCPS.toLocaleString();
     
     for (const key in upgrades) {
         const upg = upgrades[key];
@@ -49,34 +69,23 @@ function updateUI() {
     }
 }
 
-Object.keys(upgrades).forEach(key => {
-    const upg = upgrades[key];
-    upg.dom.btn.addEventListener('click', () => {
-        if (cookies >= upg.price) {
-            cookies -= upg.price;
-            upg.amount++;
-            upg.price = Math.round(upg.basePrice * Math.pow(1.15, upg.amount));
-            updateUI();
-        }
-    });
-});
-
-dom.cookieBtn.addEventListener('click', () => {
+cookieBtn.addEventListener('click', () => {
     cookies += 1;
     updateUI();
 });
 
 setInterval(() => {
-    const totalCPS = calculateTotalCPS();
+    const totalCPS = Object.values(upgrades).reduce((acc, upg) => acc + (upg.amount * upg.cps), 0);
     if (totalCPS > 0) {
         cookies += totalCPS;
         updateUI();
     }
 }, 1000);
 
-dom.shopToggle.addEventListener('click', () => {
-    const isOpen = dom.sidebar.classList.toggle('open');
-    dom.shopToggle.textContent = isOpen ? '❌ Schließen' : '🛒 Shop';
+shopToggle.addEventListener('click', () => {
+    const isOpen = sidebar.classList.toggle('open');
+    shopToggle.textContent = isOpen ? '❌ Schließen' : '🛒 Shop';
 });
 
+initShop();
 updateUI();
