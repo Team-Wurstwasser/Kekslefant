@@ -157,7 +157,7 @@ elements.closeSettings.addEventListener('click', () => {
 elements.resetBtn.addEventListener('click', () => {
     if (confirm("Möchtest du wirklich alles löschen?")) {
         isResetting = true;
-        
+
         localStorage.removeItem('kekslefant_save');
         localStorage.clear();
 
