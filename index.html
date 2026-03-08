@@ -11,6 +11,7 @@
 
     <body>
         <button id="shop-toggle">🛒 Shop</button>
+        <button id="settings-toggle">⚙️</button>
 
         <div class="header-container">
             <a href="https://team-wurstwasser.com/" class="logo-link">
@@ -36,6 +37,22 @@
             <aside class="sidebar">
                 <h2>Shop</h2>
             </aside>
+        </div>
+
+        <div id="settings-overlay" class="overlay">
+            <div class="settings-modal">
+                <div class="settings-header">
+                    <h2>Einstellungen</h2>
+                    <button id="close-settings">✖</button>
+                </div>
+                
+                <div class="settings-content">
+                    <div class="setting-item">
+                        <span>Spielstand löschen</span>
+                        <button id="reset-game" class="delete-btn">Reset</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </body>
 </html>
