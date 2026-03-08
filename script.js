@@ -157,13 +157,23 @@ elements.closeSettings.addEventListener('click', () => {
 elements.resetBtn.addEventListener('click', () => {
     if (confirm("Möchtest du wirklich alles löschen?")) {
         isResetting = true;
-
+        
         localStorage.removeItem('kekslefant_save');
         localStorage.clear();
 
-        setTimeout(() => {
-            location.reload();
-        }, 100);
+        location.reload();
+    }
+});
+
+window.addEventListener('beforeunload', () => {
+    if (!isResetting) {
+        saveGame();
+    }
+});
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden' && !isResetting) {
+        saveGame();
     }
 });
 
@@ -172,11 +182,13 @@ setInterval(() => {
         state.cookies += state.totalCPS;
         updateUI();
     }
+}, 1000);
 
+setInterval(() => {
     if (!isResetting) {
         saveGame();
     }
-}, 1000);
+}, 20000);
 
 initShop();
 loadGame();
