@@ -192,6 +192,14 @@ button:disabled {
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
+#shop-toggle:hover {
+    background-color: #a0522d;
+}
+
+#shop-toggle:active {
+    transform: scale(0.9);
+}
+
 #settings-toggle {
     position: fixed;
     bottom: 20px;
@@ -219,7 +227,7 @@ button:disabled {
 }
 
 #settings-toggle:active {
-    transform: scale(0.9);
+    transform: scale(0.9) rotate(45deg);
 }
 
 .overlay {
