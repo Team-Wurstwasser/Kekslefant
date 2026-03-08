@@ -180,4 +180,3 @@ setInterval(() => {
 
 initShop();
 loadGame();
-updateUI();
