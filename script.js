@@ -1,3 +1,5 @@
+let isResetting = false;
+
 let state = {
     cookies: 0,
     totalCPS: 0
@@ -27,7 +29,11 @@ const elements = {
     cookieBtn: document.getElementById('cookie'),
     cookieDisplay: document.getElementById('cookie-count'),
     cpsDisplay: document.getElementById('cps-count'),
-    shopToggle: document.getElementById('shop-toggle')
+    shopToggle: document.getElementById('shop-toggle'),
+    settingsBtn: document.getElementById('settings-toggle'),
+    settingsOverlay: document.getElementById('settings-overlay'),
+    closeSettings: document.getElementById('close-settings'),
+    resetBtn: document.getElementById('reset-game')
 };
 
 function calculateTotalCPS() {
@@ -55,6 +61,7 @@ function buyUpgrade(key) {
         
         calculateTotalCPS();
         updateUI();
+        saveGame();
     }
 }
 
@@ -94,6 +101,41 @@ function initShop() {
     }
 }
 
+function saveGame() {
+    const saveDate = {
+        cookies: state.cookies,
+        upgradeAmounts: {}
+    };
+
+    for (const key in upgrades) {
+        saveDate.upgradeAmounts[key] = upgrades[key].amount;
+    }
+
+    localStorage.setItem('kekslefant_save', JSON.stringify(saveDate));
+}
+
+function loadGame() {
+    const savedData = localStorage.getItem('kekslefant_save');
+    if (!savedData) return;
+
+    const data = JSON.parse(savedData);
+    
+    state.cookies = data.cookies || 0;
+
+    if (data.upgradeAmounts) {
+        for (const key in data.upgradeAmounts) {
+            if (upgrades[key]) {
+                const amount = data.upgradeAmounts[key];
+                upgrades[key].amount = amount;
+                upgrades[key].price = Math.round(upgrades[key].basePrice * Math.pow(1.15, amount));
+            }
+        }
+    }
+
+    calculateTotalCPS();
+    updateUI();
+}
+
 elements.cookieBtn.addEventListener('click', () => {
     state.cookies += 1;
     updateUI();
@@ -104,12 +146,38 @@ elements.shopToggle.addEventListener('click', () => {
     elements.shopToggle.textContent = isOpen ? '❌ Schließen' : '🛒 Shop';
 });
 
+elements.settingsBtn.addEventListener('click', () => {
+    elements.settingsOverlay.style.display = 'flex';
+});
+
+elements.closeSettings.addEventListener('click', () => {
+    elements.settingsOverlay.style.display = 'none';
+});
+
+elements.resetBtn.addEventListener('click', () => {
+    if (confirm("Möchtest du wirklich alles löschen?")) {
+        isResetting = true;
+
+        localStorage.removeItem('kekslefant_save');
+        localStorage.clear();
+
+        setTimeout(() => {
+            location.reload();
+        }, 100);
+    }
+});
+
 setInterval(() => {
     if (state.totalCPS > 0) {
         state.cookies += state.totalCPS;
         updateUI();
     }
+
+    if (!isResetting) {
+        saveGame();
+    }
 }, 1000);
 
 initShop();
+loadGame();
 updateUI();
