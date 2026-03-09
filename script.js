@@ -102,6 +102,11 @@ function initShop() {
 }
 
 function saveGame() {
+    if (isResetting) return;
+
+    const hasUpgrades = Object.values(upgrades).some(upg => upg.amount > 0);
+    if (state.cookies === 0 && !hasUpgrades) return;
+    
     const saveDate = {
         cookies: state.cookies,
         upgradeAmounts: {}
@@ -165,13 +170,11 @@ elements.resetBtn.addEventListener('click', () => {
 });
 
 window.addEventListener('beforeunload', () => {
-    if (!isResetting) {
-        saveGame();
-    }
+    saveGame();
 });
 
 document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden' && !isResetting) {
+    if (document.visibilityState === 'hidden') {
         saveGame();
     }
 });
@@ -186,11 +189,11 @@ setInterval(() => {
 }, 1000);
 
 setInterval(() => {
-    if (!isResetting && state.cookies > 0) {
-        saveGame();
-    }
+    saveGame();
 }, 20000);
 
 initShop();
 loadGame();
 updateUI();
+
+
