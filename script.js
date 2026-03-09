@@ -84,7 +84,7 @@ function initShop() {
                 <span class="upgrade-amount" id="${key}-amount">0</span>
                 <button id="buy-${key}" class="buy-btn">
                     Kaufen (<span id="${key}-price">${data.basePrice}</span> 
-                    <img src="img/Keks.png" class="price-icon">)
+                    <img src="img/Keks.svg" class="price-icon">)
                 </button>
             </div>
         `;
