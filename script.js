@@ -170,6 +170,12 @@ elements.closeSettings.addEventListener('click', () => {
     elements.settingsOverlay.style.display = 'none';
 });
 
+elements.settingsOverlay.addEventListener('click', (e) => {
+    if (e.target === elements.settingsOverlay) {
+        elements.settingsOverlay.style.display = 'none';
+    }
+});
+
 elements.resetBtn.addEventListener('click', () => {
     if (confirm("Möchtest du wirklich alles löschen?")) {
         isResetting = true;
