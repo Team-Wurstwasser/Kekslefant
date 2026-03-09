@@ -102,7 +102,10 @@ function initShop() {
 }
 
 function saveGame() {
-    if(isResetting || !state.cookied > 0) return;
+    if (isResetting) return;
+
+    const hasUpgrades = Object.values(upgrades).some(upg => upg.amount > 0);
+    if (state.cookies === 0 && !hasUpgrades) return;
     
     const saveDate = {
         cookies: state.cookies,
@@ -192,4 +195,5 @@ setInterval(() => {
 initShop();
 loadGame();
 updateUI();
+
 
