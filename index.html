@@ -59,6 +59,47 @@
                         <span>Spielstand löschen</span>
                         <button id="reset-game" class="delete-btn">Reset</button>
                     </div>
+
+                    <div class="setting-item">
+                        <span>Save-Code erstellen</span>
+                        <button id="export-save" class="setting-item-btn">Code bekommen</button>
+                    </div>
+
+                    <div class="setting-item">
+                        <span>Save-Code laden</span>
+                        <button id="import-save" class="setting-item-btn">Code eingeben</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="save-popup" class="overlay">
+            <div class="settings-modal">
+                <div class="settings-header">
+                    <h2>Save-Code</h2>
+                    <button id="close-save">
+                        <img src="img/Close.png" class="btn-icon">
+                    </button>
+                </div>
+
+                <div class="settings-content">
+                    <textarea id="save-code-field" readonly></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div id="load-popup" class="overlay">
+            <div class="settings-modal">
+                <div class="settings-header">
+                    <h2>Save-Code</h2>
+                    <button id="close-load">
+                        <img src="img/Close.png" class="btn-icon">
+                    </button>
+                </div>
+                
+                <div class="settings-content">
+                    <textarea id="load-code-field" placeholder="Code hier einfügen..."></textarea>
+                    <button id="confirm-load" class="setting-item-btn">Laden</button>
                 </div>
             </div>
         </div>
