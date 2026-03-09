@@ -133,7 +133,6 @@ function loadGame() {
     }
 
     calculateTotalCPS();
-    updateUI();
 }
 
 elements.cookieBtn.addEventListener('click', () => {
@@ -177,6 +176,8 @@ document.addEventListener('visibilitychange', () => {
     }
 });
 
+window.addEventListener("contextmenu", e => e.preventDefault());
+
 setInterval(() => {
     if (state.totalCPS > 0) {
         state.cookies += state.totalCPS;
@@ -185,10 +186,11 @@ setInterval(() => {
 }, 1000);
 
 setInterval(() => {
-    if (!isResetting) {
+    if (!isResetting && state.cookies > 0) {
         saveGame();
     }
 }, 20000);
 
 initShop();
 loadGame();
+updateUI();
