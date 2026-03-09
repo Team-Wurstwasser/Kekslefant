@@ -28,6 +28,8 @@ const elements = {
     cookieDisplay: document.getElementById('cookie-count'),
     cpsDisplay: document.getElementById('cps-count'),
     shopToggle: document.getElementById('shop-toggle'),
+    shopIcon: document.getElementById('shop-icon'),
+    shopText: document.getElementById('shop-text'),
     settingsBtn: document.getElementById('settings-toggle'),
     settingsOverlay: document.getElementById('settings-overlay'),
     closeSettings: document.getElementById('close-settings'),
@@ -89,8 +91,12 @@ function initShop() {
             </div>
             <div class="upgrade-controls">
                 <span class="upgrade-amount" id="${key}-amount">0</span>
-                <button id="buy-${key}" class="buy-btn">Kaufen (<span id="${key}-price">${data.basePrice}</span> 🍪)</button>
-            </div>`;
+                <button id="buy-${key}" class="buy-btn">
+                    Kaufen (<span id="${key}-price">${data.basePrice}</span> 
+                    <img src="img/Keks.svg" class="price-icon">)
+                </button>
+            </div>
+        `;
         
         elements.sidebar.appendChild(itemDiv);
 
@@ -109,10 +115,22 @@ function initShop() {
     }
 }
 
-function getSavePayload() {
-    const upgradeAmounts = {};
-    for (const key in upgrades) upgradeAmounts[key] = upgrades[key].amount;
-    return { cookies: state.cookies, upgradeAmounts };
+function saveGame() {
+    if (isResetting) return;
+
+    const hasUpgrades = Object.values(upgrades).some(upg => upg.amount > 0);
+    if (state.cookies === 0 && !hasUpgrades) return;
+    
+    const saveDate = {
+        cookies: state.cookies,
+        upgradeAmounts: {}
+    };
+
+    for (const key in upgrades) {
+        saveDate.upgradeAmounts[key] = upgrades[key].amount;
+    }
+
+    localStorage.setItem('kekslefant_save', JSON.stringify(saveDate));
 }
 
 function applySaveData(data) {
@@ -127,7 +145,6 @@ function applySaveData(data) {
         }
     }
     calculateTotalCPS();
-    updateUI();
 }
 
 function saveGame() {
@@ -145,71 +162,57 @@ elements.cookieBtn.onclick = () => {
     updateUI();
 };
 
-elements.shopToggle.onclick = () => {
+elements.shopToggle.addEventListener('click', () => {
     const isOpen = elements.sidebar.classList.toggle('open');
-    elements.shopToggle.textContent = isOpen ? '❌ Schließen' : '🛒 Shop';
-};
 
-elements.settingsBtn.onclick = () => elements.settingsOverlay.style.display = 'flex';
-elements.closeSettings.onclick = () => elements.settingsOverlay.style.display = 'none';
+    if (isOpen) {
+        elements.shopIcon.src = 'img/Close.png';
+        elements.shopText.textContent = ' Schließen';
+    } else {
+        elements.shopIcon.src = 'img/Shop.png';
+        elements.shopText.textContent = ' Shop';
+    }
+});
+
 elements.closeSave.onclick = () => elements.savePopup.style.display = 'none';
 elements.closeLoad.onclick = () => elements.loadPopup.style.display = 'none';
 
-elements.resetBtn.onclick = () => {
+elements.settingsBtn.addEventListener('click', () => {
+    elements.settingsOverlay.style.display = 'flex';
+});
+
+elements.closeSettings.addEventListener('click', () => {
+    elements.settingsOverlay.style.display = 'none';
+});
+
+elements.settingsOverlay.addEventListener('click', (e) => {
+    if (e.target === elements.settingsOverlay) {
+        elements.settingsOverlay.style.display = 'none';
+    }
+});
+
+elements.resetBtn.addEventListener('click', () => {
     if (confirm("Möchtest du wirklich alles löschen?")) {
         isResetting = true;
+
+        localStorage.removeItem('kekslefant_save');
         localStorage.clear();
+
         location.reload();
     }
-};
+});
 
-elements.exportBtn.onclick = () => {
-    const code = btoa(JSON.stringify(getSavePayload()));
-    elements.saveField.value = code;
-    elements.savePopup.style.display = 'flex';
-};
+window.addEventListener('beforeunload', () => {
+    saveGame();
+});
 
-elements.importBtn.onclick = () => {
-    elements.loadField.value = "";
-    elements.loadPopup.style.display = 'flex';
-};
-
-elements.confirmLoadBtn.onclick = () => {
-    try {
-        const data = JSON.parse(atob(elements.loadField.value.trim()));
-        if (confirm("Spielstand laden? Aktueller Fortschritt geht verloren.")) {
-            applySaveData(data);
-            saveGame();
-            elements.loadPopup.style.display = 'none';
-            elements.settingsOverlay.style.display = 'none';
-        }
-    } catch (e) {
-        alert("Ungültiger Code!");
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+        saveGame();
     }
-};
+});
 
-elements.copySaveBtn.onclick = () => {
-    elements.saveField.select();
-    navigator.clipboard.writeText(elements.saveField.value);
-    
-    const originalText = elements.copySaveBtn.innerText;
-    elements.copySaveBtn.innerText = "✅ Kopiert!";
-    elements.copySaveBtn.style.backgroundColor = "#1b5e20";
-    
-    setTimeout(() => {
-        elements.copySaveBtn.innerText = originalText;
-        elements.copySaveBtn.style.backgroundColor = "";
-    }, 2000);
-};
-
-window.onclick = (event) => {
-    if (event.target.classList.contains('overlay')) {
-        event.target.style.display = 'none';
-    }
-};
-
-window.addEventListener('beforeunload', saveGame);
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveGame(); });
+window.addEventListener("contextmenu", e => e.preventDefault());
 
 setInterval(() => {
     if (state.totalCPS > 0) {
@@ -218,7 +221,10 @@ setInterval(() => {
     }
 }, 1000);
 
-setInterval(saveGame, 20000);
+setInterval(() => {
+    saveGame();
+}, 20000);
 
 initShop();
 loadGame();
+updateUI();

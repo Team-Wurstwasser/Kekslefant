@@ -10,8 +10,14 @@
     </head>
 
     <body>
-        <button id="shop-toggle">🛒 Shop</button>
-        <button id="settings-toggle">⚙️</button>
+        <button id="shop-toggle">
+            <img src="img/Shop.png" class="btn-icon" id="shop-icon">
+            <span id="shop-text">Shop</span>
+        </button>
+        
+        <button id="settings-toggle">
+            <img src="img/Settings.png" class="btn-icon">
+        </button>
 
         <div class="header-container">
             <a href="https://team-wurstwasser.com/" class="logo-link">
@@ -31,7 +37,7 @@
                     </div>
                 </div>
 
-                <div id="cookie">🍪</div>
+                <img id="cookie" src="img/Keks.svg" alt="Cookie">
             </main>
 
             <aside class="sidebar">
@@ -43,9 +49,11 @@
             <div class="settings-modal">
                 <div class="settings-header">
                     <h2>Einstellungen</h2>
-                    <button id="close-settings">✖</button>
+                    <button id="close-settings">
+                        <img src="img/Close.png" class="btn-icon">
+                    </button>
                 </div>
-                
+
                 <div class="settings-content">
                     <div class="setting-item">
                         <span>Spielstand löschen</span>
