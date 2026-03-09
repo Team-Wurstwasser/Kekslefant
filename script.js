@@ -7,16 +7,18 @@ let state = {
 
 const upgradeData = {
     snail: {
-        name: "Schnecken-Zucht",
-        desc: "+1 Cookie/s",
-        basePrice: 10, cps: 1,
-        icon: "img/Schnecke.png"
-    },
+        name: "Schnecken-Zucht", 
+        desc: "+1 Cookie/s", 
+        basePrice: 10, 
+        cps: 1, 
+        icon: "img/Schnecke.png" 
+        },
     elephant: {
-        name: "Elefanten-Fabrik",
-        desc: "+10 Cookies/s",
-        basePrice: 100, cps: 10,
-        icon: "img/Elefant.png"
+        name: "Elefanten-Fabrik", 
+        desc: "+10 Cookies/s", 
+        basePrice: 100, 
+        cps: 10, 
+        icon: "img/Elefant.png" 
     }
 };
 
@@ -33,20 +35,8 @@ const elements = {
     settingsBtn: document.getElementById('settings-toggle'),
     settingsOverlay: document.getElementById('settings-overlay'),
     closeSettings: document.getElementById('close-settings'),
-    resetBtn: document.getElementById('reset-game'),
-    exportBtn: document.getElementById('export-save'),
-    importBtn: document.getElementById('import-save'),
-    savePopup: document.getElementById('save-popup'),
-    loadPopup: document.getElementById('load-popup'),
-    closeSave: document.getElementById('close-save'),
-    closeLoad: document.getElementById('close-load'),
-    saveField: document.getElementById('save-code-field'),
-    loadField: document.getElementById('load-code-field'),
-    copySaveBtn: document.getElementById('copy-save-btn'),
-    confirmLoadBtn: document.getElementById('confirm-load')
+    resetBtn: document.getElementById('reset-game')
 };
-
-const getPrice = (base, amount) => Math.round(base * Math.pow(1.15, amount));
 
 function calculateTotalCPS() {
     state.totalCPS = Object.values(upgrades).reduce((acc, upg) => acc + (upg.amount * upg.cps), 0);
@@ -59,17 +49,17 @@ function updateUI() {
     for (const key in upgrades) {
         const upg = upgrades[key];
         upg.dom.amount.innerText = upg.amount;
-        upg.dom.price.innerText = upg.currentPrice.toLocaleString();
-        upg.dom.btn.disabled = state.cookies < upg.currentPrice;
+        upg.dom.price.innerText = Math.ceil(upg.price).toLocaleString();
+        upg.dom.btn.disabled = state.cookies < upg.price;
     }
 }
 
 function buyUpgrade(key) {
     const upg = upgrades[key];
-    if (state.cookies >= upg.currentPrice) {
-        state.cookies -= upg.currentPrice;
+    if (state.cookies >= upg.price) {
+        state.cookies -= upg.price;
         upg.amount++;
-        upg.currentPrice = getPrice(upg.basePrice, upg.amount);
+        upg.price = Math.round(upg.basePrice * Math.pow(1.15, upg.amount));
         
         calculateTotalCPS();
         updateUI();
@@ -81,6 +71,7 @@ function initShop() {
     for (const [key, data] of Object.entries(upgradeData)) {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'upgrade-item';
+        
         itemDiv.innerHTML = `
             <div class="upgrade-info">
                 <img src="${data.icon}" alt="${data.name}" class="upgrade-icon">
@@ -103,7 +94,7 @@ function initShop() {
         upgrades[key] = {
             ...data,
             amount: 0,
-            currentPrice: data.basePrice,
+            price: data.basePrice,
             dom: {
                 btn: document.getElementById(`buy-${key}`),
                 price: document.getElementById(`${key}-price`),
@@ -111,7 +102,7 @@ function initShop() {
             }
         };
 
-        upgrades[key].dom.btn.onclick = () => buyUpgrade(key);
+        upgrades[key].dom.btn.addEventListener('click', () => buyUpgrade(key));
     }
 }
 
@@ -133,34 +124,31 @@ function saveGame() {
     localStorage.setItem('kekslefant_save', JSON.stringify(saveDate));
 }
 
-function applySaveData(data) {
-    if (!data) return;
+function loadGame() {
+    const savedData = localStorage.getItem('kekslefant_save');
+    if (!savedData) return;
+
+    const data = JSON.parse(savedData);
+    
     state.cookies = data.cookies || 0;
+
     if (data.upgradeAmounts) {
         for (const key in data.upgradeAmounts) {
             if (upgrades[key]) {
-                upgrades[key].amount = data.upgradeAmounts[key];
-                upgrades[key].currentPrice = getPrice(upgrades[key].basePrice, upgrades[key].amount);
+                const amount = data.upgradeAmounts[key];
+                upgrades[key].amount = amount;
+                upgrades[key].price = Math.round(upgrades[key].basePrice * Math.pow(1.15, amount));
             }
         }
     }
+
     calculateTotalCPS();
 }
 
-function saveGame() {
-    if (isResetting) return;
-    localStorage.setItem('kekslefant_save', JSON.stringify(getSavePayload()));
-}
-
-function loadGame() {
-    const saved = localStorage.getItem('kekslefant_save');
-    if (saved) applySaveData(JSON.parse(saved));
-}
-
-elements.cookieBtn.onclick = () => {
-    state.cookies++;
+elements.cookieBtn.addEventListener('click', () => {
+    state.cookies += 1;
     updateUI();
-};
+});
 
 elements.shopToggle.addEventListener('click', () => {
     const isOpen = elements.sidebar.classList.toggle('open');
@@ -173,9 +161,6 @@ elements.shopToggle.addEventListener('click', () => {
         elements.shopText.textContent = ' Shop';
     }
 });
-
-elements.closeSave.onclick = () => elements.savePopup.style.display = 'none';
-elements.closeLoad.onclick = () => elements.loadPopup.style.display = 'none';
 
 elements.settingsBtn.addEventListener('click', () => {
     elements.settingsOverlay.style.display = 'flex';
