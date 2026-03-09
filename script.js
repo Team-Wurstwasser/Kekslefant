@@ -156,10 +156,9 @@ function importGame() {
         saveGame();
 
         hideOverlay(elements.loadPopup);
-        elements.settingsOverlay.style.display = 'none';
-        elements.loadCodeField.value = "";
-        alert("Spielstand erfolgreich geladen!");
+        hideOverlay(elements.settingsOverlay);
 
+        alert("Spielstand erfolgreich geladen!");
     } catch (e) {
         alert("Ungültiger Save-Code!");
     }
