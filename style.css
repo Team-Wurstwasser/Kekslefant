@@ -49,7 +49,7 @@ body {
 }
 
 #cookie {
-    font-size: clamp(180px, 45vw, 350px);
+    width: clamp(200px, 50vw, 400px); 
     cursor: pointer;
     user-select: none;
     transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -82,7 +82,6 @@ body {
     border-radius: 12px;
     padding: 15px;
     margin-bottom: 15px;
-    transition: background 0.2s;
 }
 
 .upgrade-info {
@@ -126,7 +125,7 @@ body {
     color: #ffd700;
 }
 
-button {
+.buy-btn {
     flex: 1;
     padding: 10px;
     border: none;
@@ -138,14 +137,23 @@ button {
     transition: background 0.2s;
 }
 
-button:hover:not(:disabled) {
+.buy-btn:hover:not(:disabled) {
     background-color: #a0522d;
 }
 
-button:disabled {
+.buy-btn:disabled {
     background-color: #2e1f16;
     color: #777;
     cursor: not-allowed;
+}
+
+.price-icon {
+    height: 16px;
+    width: auto;
+    vertical-align: middle;
+    margin-left: 2px;
+    margin-bottom: 2px;
+    pointer-events: none;
 }
 
 .header-container {
@@ -153,8 +161,6 @@ button:disabled {
     top: 20px;
     left: 20px;
     z-index: 100;
-    padding: 5px;
-    border-radius: 10px;
 }
 
 .logo-link {
@@ -177,6 +183,13 @@ button:disabled {
   text-shadow: 1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
 }
 
+.btn-icon {
+    height: 20px;
+    width: auto;
+    vertical-align: middle;
+    pointer-events: none;
+}
+
 #shop-toggle {
     display: none;
     position: fixed;
@@ -185,11 +198,14 @@ button:disabled {
     z-index: 2000;
     background: #8b4513;
     color: white;
-    padding: 10px 20px;
+    padding: 10px 22px;
     border: 2px solid #ffd700;
     border-radius: 25px;
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
 }
 
 #shop-toggle:hover {
@@ -211,8 +227,6 @@ button:disabled {
     border-radius: 50%;
     width: 50px;
     height: 50px;
-    font-size: 24px; 
-    line-height: 0; 
     cursor: pointer;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     display: flex;
@@ -271,10 +285,7 @@ button:disabled {
 #close-settings {
     background: none;
     border: none;
-    font-size: 24px;
-    color: #3d2b1f;
     cursor: pointer;
-    flex: 0;
 }
 
 .setting-item {
@@ -285,8 +296,15 @@ button:disabled {
 }
 
 .delete-btn {
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
     background-color: #d32f2f;
-    max-width: 100px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: 100px;
 }
 
 .delete-btn:hover {
@@ -295,7 +313,7 @@ button:disabled {
 
 @media (max-width: 800px) {
     #shop-toggle {
-        display: block;
+        display: flex;
     }
 
     #settings-toggle {
@@ -314,22 +332,13 @@ button:disabled {
         transform: translateX(100%);
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 999;
-        border-left: none;
     }
 
     .sidebar.open {
         transform: translateX(0);
     }
 
-    .sidebar h2 {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px;
-    }
-
     .logo-text {
         display: none;
     }
-
 }

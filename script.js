@@ -30,6 +30,8 @@ const elements = {
     cookieDisplay: document.getElementById('cookie-count'),
     cpsDisplay: document.getElementById('cps-count'),
     shopToggle: document.getElementById('shop-toggle'),
+    shopIcon: document.getElementById('shop-icon'),
+    shopText: document.getElementById('shop-text'),
     settingsBtn: document.getElementById('settings-toggle'),
     settingsOverlay: document.getElementById('settings-overlay'),
     closeSettings: document.getElementById('close-settings'),
@@ -80,7 +82,10 @@ function initShop() {
             </div>
             <div class="upgrade-controls">
                 <span class="upgrade-amount" id="${key}-amount">0</span>
-                <button id="buy-${key}" class="buy-btn">Kaufen (<span id="${key}-price">${data.basePrice}</span> 🍪)</button>
+                <button id="buy-${key}" class="buy-btn">
+                    Kaufen (<span id="${key}-price">${data.basePrice}</span> 
+                    <img src="img/Keks.png" class="price-icon">)
+                </button>
             </div>
         `;
         
@@ -147,7 +152,14 @@ elements.cookieBtn.addEventListener('click', () => {
 
 elements.shopToggle.addEventListener('click', () => {
     const isOpen = elements.sidebar.classList.toggle('open');
-    elements.shopToggle.textContent = isOpen ? '❌ Schließen' : '🛒 Shop';
+
+    if (isOpen) {
+        elements.shopIcon.src = 'img/Close.png';
+        elements.shopText.textContent = ' Schließen';
+    } else {
+        elements.shopIcon.src = 'img/Shop.png';
+        elements.shopText.textContent = ' Shop';
+    }
 });
 
 elements.settingsBtn.addEventListener('click', () => {
@@ -195,5 +207,3 @@ setInterval(() => {
 initShop();
 loadGame();
 updateUI();
-
-
