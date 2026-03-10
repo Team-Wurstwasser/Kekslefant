@@ -19,6 +19,13 @@ const upgradeData = {
         basePrice: 100,
         cps: 10,
         icon: "img/Elefant.png"
+    },
+    wurst: {
+        name: "Wurst-Fabrik",
+        desc: "+50 Cookies/s",
+        basePrice: 1000,
+        cps: 50,
+        icon: "img/Logo.png"
     }
 };
 
@@ -234,17 +241,10 @@ elements.confirmLoadBtn.addEventListener('click', importGame);
 elements.closeSave.addEventListener('click', () => hideOverlay(elements.savePopup));
 elements.closeLoad.addEventListener('click', () => hideOverlay(elements.loadPopup));
 
-[elements.settingsOverlay, elements.savePopup, elements.loadPopup].forEach(overlay => {
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) hideOverlay(overlay);
-    });
-});
-
 window.addEventListener('beforeunload', saveGame);
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') saveGame();
 });
-window.addEventListener("contextmenu", e => e.preventDefault());
 
 setInterval(() => {
     if (state.totalCPS > 0) {
