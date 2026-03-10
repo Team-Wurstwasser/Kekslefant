@@ -2,10 +2,12 @@ let isResetting = false;
 
 let state = {
     cookies: 0,
-    totalCPS: 0
+    totalCPS: 0,
+    clickValue: 1,
+    multipliers: { snail: 1, elephant: 1, wurst: 1 }
 };
 
-const upgradeData = {
+const factoryData = {
     snail: {
         name: "Schnecken-Zucht",
         desc: "+1 Cookie/s",
@@ -29,7 +31,26 @@ const upgradeData = {
     }
 };
 
+const upgradeData = {
+    stronger_fingers: {
+        name: "Starke Finger",
+        desc: "Klicks bringen +1",
+        basePrice: 50,
+        type: "clickBoost",
+        icon: "img/Keks.svg"
+    },
+    snail_turbo: {
+        name: "Turbo-Schnecken",
+        desc: "Schnecken sind 2x so schnell",
+        basePrice: 250,
+        type: "multiplier",
+        target: "snail",
+        icon: "img/Schnecke.png"
+    }
+};
+
 const upgrades = {};
+const specialUpgrades = {};
 
 const elements = {
     sidebar: document.querySelector('.sidebar'),
@@ -55,7 +76,10 @@ const elements = {
 };
 
 function calculateTotalCPS() {
-    state.totalCPS = Object.values(upgrades).reduce((acc, upg) => acc + (upg.amount * upg.cps), 0);
+    state.totalCPS = Object.keys(factoryData).reduce((acc, key) => {
+        const upg = upgrades[key];
+        return acc + (upg.amount * upg.cps * (state.multipliers[key] || 1));
+    }, 0);
 }
 
 function updateUI() {
@@ -77,6 +101,24 @@ function buyUpgrade(key) {
         upg.amount++;
         upg.price = Math.round(upg.basePrice * Math.pow(1.15, upg.amount));
 
+        calculateTotalCPS();
+        updateUI();
+        saveGame();
+    }
+}
+
+function buySpecialUpgrade(key) {
+    const spec = specialUpgrades[key];
+    if (state.cookies >= spec.price && !spec.bought) {
+        state.cookies -= spec.price;
+        spec.bought = true;
+
+        if (spec.type === "clickBoost") state.clickValue += 1;
+        if (spec.type === "multiplier") state.multipliers[spec.target] *= 2;
+
+        spec.dom.btn.disabled = true;
+        spec.dom.btn.innerText = "Gekauft";
+        
         calculateTotalCPS();
         updateUI();
         saveGame();
@@ -172,23 +214,43 @@ function importGame() {
 }
 
 function initShop() {
+
+    const upgradeList = document.getElementById('upgrade-list');
     for (const [key, data] of Object.entries(upgradeData)) {
+        const btn = document.createElement('button');
+        btn.className = 'upgrade-unlock-btn';
+        btn.title = `${data.name}: ${data.desc} (${data.basePrice} Kekse)`;
+        btn.innerHTML = `<img src="${data.icon}" class="btn-icon">`;
+        
+        upgradeList.appendChild(btn);
+        
+        specialUpgrades[key] = {
+            ...data,
+            price: data.basePrice,
+            bought: false,
+            dom: { btn: btn }
+        };
+        
+        btn.addEventListener('click', () => buySpecialUpgrade(key));
+    }
+
+    for (const [key, data] of Object.entries(factoryData)) {
         const itemDiv = document.createElement('div');
-        itemDiv.className = 'upgrade-item';
+        itemDiv.className = 'factory-item';
 
         itemDiv.innerHTML = `
-            <div class="upgrade-info">
-                <img src="${data.icon}" alt="${data.name}" class="upgrade-icon">
-                <div class="upgrade-texts">
-                    <span class="upgrade-name">${data.name}</span>
-                    <span class="upgrade-desc">${data.desc}</span>
+            <div class="factory-info">
+                <img src="${data.icon}" alt="${data.name}" class="factory-icon">
+                <div class="factory-texts">
+                    <span class="factory-name">${data.name}</span>
+                    <span class="factory-desc">${data.desc}</span>
                 </div>
             </div>
-            <div class="upgrade-controls">
-                <span class="upgrade-amount" id="${key}-amount">0</span>
-                <button id="buy-${key}" class="buy-btn">
+            <div class="factory-controls">
+                <span class="factory-amount" id="${key}-amount">0</span>
+                <button id="buy-${key}" class="factory-buy-btn">
                     Kaufen (<span id="${key}-price">${data.basePrice}</span> 
-                    <img src="img/Keks.svg" class="price-icon">)
+                    <img src="img/Keks.svg" class="factory-price-icon">)
                 </button>
             </div>
         `;
