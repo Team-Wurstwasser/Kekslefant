@@ -4,7 +4,10 @@ const state = {
     cookies: 0,
     totalCPS: 0,
     clickValue: 1,
-    multipliers: { snail: 1, elephant: 1, wurst: 1 },
+    multipliers: {
+        snail: 1,
+        elephant: 1,
+        wurst: 1 },
     lastUpdate: Date.now()
 };
 
@@ -29,7 +32,7 @@ const factoryData = {
 const upgradeData = {
     stronger_fingers: {
         name: "Starke Finger",
-        desc: "Klicks bringen +1", 
+        desc: "Klicks bringen +1 mehr Cookies", 
         price: 50,
         type: "clickBoost", 
         boost: 1,
@@ -134,7 +137,7 @@ function buyUpgrade(key) {
     }
 }
 
-function getSaveObject() {
+function getSaveData() {
     const upgradeAmounts = {};
     for (const key in factoryList) upgradeAmounts[key] = factoryList[key].amount;
 
@@ -188,7 +191,7 @@ function applySaveData(data) {
 
 function saveGame() {
     if (isResetting) return;
-    localStorage.setItem('kekslefant_save', JSON.stringify(getSaveObject()));
+    localStorage.setItem('kekslefant_save', JSON.stringify(getSaveData()));
 }
 
 function loadGame() {
