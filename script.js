@@ -22,42 +22,50 @@ const factoryData = {
         name: "Schnecken-Zucht",
         basePrice: 10,
         cps: 1,
-        icon: "img/Schnecke.png" },
+        icon: "img/Schnecke.png"
+    },
     elephant: {
         name: "Elefanten-Fabrik",
         basePrice: 100,
         cps: 10,
-        icon: "img/Elefant.png" },
+        icon: "img/Elefant.png"
+    },
     wurst: {
         name: "Wurst-Fabrik",
         basePrice: 1000,
         cps: 50,
-        icon: "img/Logo.png" },
+        icon: "img/Logo.png"
+    },
     bakery: {
         name: "Groß-Bäckerei",
         basePrice: 12000,
         cps: 125,
-        icon: "img/Logo.png" },
+        icon: "img/Logo.png"
+    },
     mine: {
         name: "Keks-Mine",
         basePrice: 150000,
         cps: 600,
-        icon: "img/Logo.png" },
+        icon: "img/Logo.png"
+    },
     station: {
         name: "Weltraum-Station",
         basePrice: 1200000,
         cps: 3500,
-        icon: "img/Logo.png" },
+        icon: "img/Logo.png"
+    },
     temple: {
         name: "Keks-Tempel",
         basePrice: 25000000,
         cps: 20000,
-        icon: "img/Logo.png" },
+        icon: "img/Logo.png"
+    },
     galaxy: {
         name: "Keks-Galaxie",
         basePrice: 500000000,
         cps: 150000,
-        icon: "img/Logo.png" }
+        icon: "img/Logo.png"
+    }
 };
 
 const upgradeData = {
