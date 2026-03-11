@@ -56,7 +56,7 @@ body {
 }
 
 #cookie:active {
-    transform: scale(0.92);
+    transform: scale(0.9);
 }
 .sidebar {
     width: 350px;
@@ -201,7 +201,6 @@ body {
     background: #8b4513;
     border: 2px solid #ffd700;
     cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -218,6 +217,10 @@ body {
     z-index: 3000;
 }
 
+#shop-toggle:active {
+    transform: scale(0.9);
+}
+
 #settings-toggle {
     bottom: 20px;
     left: 20px;
@@ -231,6 +234,10 @@ body {
 #settings-toggle:hover {
     background-color: #a0522d;
     transform: rotate(45deg);
+}
+
+#settings-toggle:active {
+    transform: rotate(45deg) scale(0.9);
 }
 
 .overlay {
