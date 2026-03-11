@@ -32,11 +32,19 @@ const factoryData = {
 const upgradeData = {
     stronger_fingers: {
         name: "Starke Finger",
-        desc: "Klicks bringen +1 mehr Cookies", 
+        desc: "Klicks bringen +1", 
         price: 50,
         type: "clickBoost", 
         boost: 1,
         icon: "img/Keks.svg" },
+    
+    click_hammer: {
+        name: "Keks-Hammer",
+        desc: "Jeder Klick ist 5x so stark",
+        price: 5000,
+        type: "clickMultiplier",
+        factor: 5,
+        icon: "img/Logo.png" },
     snail_turbo: {
         name: "Turbo-Schnecken",
         desc: "Schnecken sind 3x so schnell",
@@ -44,7 +52,30 @@ const upgradeData = {
         type: "multiplier",
         target: "snail", 
         factor: 3,
-        icon: "img/Schnecke.png" }
+        icon: "img/Schnecke.png" },
+    elephant_energy: {
+        name: "Elefanten-Energy",
+        desc: "Elefanten arbeiten 2x so hart",
+        price: 2500,
+        type: "multiplier",
+        target: "elephant",
+        factor: 2,
+        icon: "img/Logo.png" },
+    wurst_overclock: {
+        name: "Wurst-Übertaktung",
+        desc: "Die Wurst-Fabrik läuft auf 400%",
+        price: 25000,
+        type: "multiplier",
+        target: "wurst",
+        factor: 4,
+        icon: "img/Logo.png" },
+    sugar_rush: {
+        name: "Zuckerschock",
+        desc: "ALLES produziert 2x so viel",
+        price: 100000,
+        type: "globalMultiplier",
+        factor: 2,
+        icon: "img/Logo.png" }
 };
 
 const factoryList = {}; 
@@ -120,17 +151,27 @@ function buyUpgrade(key) {
         state.cookies -= spec.price;
         spec.bought = true;
 
-        if (spec.type === "clickBoost") {
-            state.clickValue += (spec.boost || 1);
-        }
-        
-        if (spec.type === "multiplier") {
-            const multiFactor = spec.factor || 2; 
-            state.multipliers[spec.target] *= multiFactor;
+        switch (spec.type) {
+            case "clickBoost":
+                state.clickValue += (spec.boost || 1);
+                break;
+            
+            case "clickMultiplier":
+                state.clickValue *= (spec.factor || 1);
+                break;
+
+            case "multiplier":
+                state.multipliers[spec.target] *= (spec.factor || 2);
+                break;
+
+            case "globalMultiplier":
+                Object.keys(state.multipliers).forEach(m => {
+                    state.multipliers[m] *= (spec.factor || 2);
+                });
+                break;
         }
 
         spec.dom.btn.remove(); 
-        
         calculateTotalCPS();
         updateUI();
         saveGame();
@@ -286,7 +327,7 @@ elements.settingsBtn.addEventListener('click', () => showOverlay(elements.settin
 elements.closeSettings.addEventListener('click', () => hideOverlay(elements.settingsOverlay));
 
 elements.exportBtn.addEventListener('click', () => {
-    elements.saveCodeField.value = btoa(JSON.stringify(getSaveObject()));
+    elements.saveCodeField.value = btoa(JSON.stringify(getSaveData()));
     showOverlay(elements.savePopup);
 });
 
