@@ -11,19 +11,16 @@ const state = {
 const factoryData = {
     snail: {
         name: "Schnecken-Zucht",
-        desc: "+1 Cookie/s",
         basePrice: 10,
         cps: 1,
         icon: "img/Schnecke.png" },
     elephant: {
         name: "Elefanten-Fabrik",
-        desc: "+10 Cookies/s",
         basePrice: 100,
         cps: 10,
         icon: "img/Elefant.png" },
     wurst: {
         name: "Wurst-Fabrik",
-        desc: "+50 Cookies/s",
         basePrice: 1000,
         cps: 50,
         icon: "img/Logo.png" }
@@ -35,13 +32,15 @@ const upgradeData = {
         desc: "Klicks bringen +1", 
         price: 50,
         type: "clickBoost", 
+        boost: 1,
         icon: "img/Keks.svg" },
     snail_turbo: {
         name: "Turbo-Schnecken",
-        desc: "Schnecken sind 2x so schnell",
+        desc: "Schnecken sind 3x so schnell",
         price: 250, 
         type: "multiplier",
         target: "snail", 
+        factor: 3,
         icon: "img/Schnecke.png" }
 };
 
@@ -85,15 +84,21 @@ function updateUI() {
 
     for (const key in factoryList) {
         const upg = factoryList[key];
+        const currentMulti = state.multipliers[key] || 1;
+        const effectiveCPS = upg.cps * currentMulti;
+
         upg.dom.amount.innerText = upg.amount;
         upg.dom.price.innerText = Math.ceil(upg.price).toLocaleString();
+        
+        upg.dom.desc.innerText = `+${effectiveCPS.toLocaleString()} Cookies/s`;
+
         upg.dom.btn.disabled = state.cookies < upg.price;
     }
 
     checkUpgradeUnlocks();
 }
 
-function buyUpgrade(key) {
+function buyFactory(key) {
     const upg = factoryList[key];
     if (state.cookies >= upg.price) {
         state.cookies -= upg.price;
@@ -106,14 +111,20 @@ function buyUpgrade(key) {
     }
 }
 
-function buySpecialUpgrade(key) {
+function buyUpgrade(key) {
     const spec = upgradesList[key];
     if (state.cookies >= spec.price && !spec.bought) {
         state.cookies -= spec.price;
         spec.bought = true;
 
-        if (spec.type === "clickBoost") state.clickValue += 1;
-        if (spec.type === "multiplier") state.multipliers[spec.target] *= 2;
+        if (spec.type === "clickBoost") {
+            state.clickValue += (spec.boost || 1);
+        }
+        
+        if (spec.type === "multiplier") {
+            const multiFactor = spec.factor || 2; 
+            state.multipliers[spec.target] *= multiFactor;
+        }
 
         spec.dom.btn.remove(); 
         
@@ -197,8 +208,7 @@ function initShop() {
                 <img src="${data.icon}" alt="${data.name}" class="factory-icon">
                 <div class="factory-texts">
                     <span class="factory-name">${data.name}</span>
-                    <span class="factory-desc">${data.desc}</span>
-                </div>
+                    <span class="factory-desc"></span> </div>
                 <div class="factory-count-badge"><span class="factory-amount" id="${key}-amount">0</span></div>
             </div>
             <div class="factory-controls">
@@ -220,10 +230,11 @@ function initShop() {
             dom: {
                 btn: document.getElementById(`buy-${key}`),
                 price: document.getElementById(`${key}-price`),
-                amount: document.getElementById(`${key}-amount`)
+                amount: document.getElementById(`${key}-amount`),
+                desc: itemDiv.querySelector('.factory-desc')
             }
         };
-        factoryList[key].dom.btn.addEventListener('click', () => buyUpgrade(key));
+        factoryList[key].dom.btn.addEventListener('click', () => buyFactory(key));
     }
 }
 
@@ -236,7 +247,7 @@ function checkUpgradeUnlocks() {
         if (state.cookies >= data.price * 0.8) {
             const btn = document.createElement('button');
             btn.className = 'upgrade-unlock-btn';
-            btn.title = `${data.name}: ${data.desc} (${data.price} Kekse)`;
+            btn.title = `${data.name}: ${data.desc} - Kosten: ${data.price}`;
             btn.innerHTML = `<img src="${data.icon}" class="btn-icon">`;
             
             upgradeContainer.appendChild(btn);
@@ -249,7 +260,7 @@ function checkUpgradeUnlocks() {
                 dom: { btn: btn }
             };
 
-            btn.addEventListener('click', () => buySpecialUpgrade(key));
+            btn.addEventListener('click', () => buyUpgrade(key));
         }
     }
 }
