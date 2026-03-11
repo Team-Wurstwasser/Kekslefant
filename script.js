@@ -33,13 +33,13 @@ const upgradeData = {
     stronger_fingers: {
         name: "Starke Finger",
         desc: "Klicks bringen +1", 
-        basePrice: 50,
+        price: 50,
         type: "clickBoost", 
         icon: "img/Keks.svg" },
     snail_turbo: {
         name: "Turbo-Schnecken",
         desc: "Schnecken sind 2x so schnell",
-        basePrice: 250, 
+        price: 250, 
         type: "multiplier",
         target: "snail", 
         icon: "img/Schnecke.png" }
@@ -71,7 +71,6 @@ const elements = {
     closeSave: document.getElementById('close-save'),
     closeLoad: document.getElementById('close-load')
 };
-
 
 function calculateTotalCPS() {
     state.totalCPS = Object.keys(factoryData).reduce((acc, key) => {
@@ -229,23 +228,23 @@ function initShop() {
 }
 
 function checkUpgradeUnlocks() {
-    const upgradeList = document.getElementById('upgrade-list');
+    const upgradeContainer = document.getElementById('upgrade-list');
 
     for (const [key, data] of Object.entries(upgradeData)) {
         if (upgradesList[key]?.bought || visibleupgrades.has(key)) continue;
 
-        if (state.cookies >= data.basePrice * 0.8) {
+        if (state.cookies >= data.price * 0.8) {
             const btn = document.createElement('button');
             btn.className = 'upgrade-unlock-btn';
-            btn.title = `${data.name}: ${data.desc} (${data.basePrice} Kekse)`;
+            btn.title = `${data.name}: ${data.desc} (${data.price} Kekse)`;
             btn.innerHTML = `<img src="${data.icon}" class="btn-icon">`;
             
-            upgradeList.appendChild(btn);
+            upgradeContainer.appendChild(btn);
             visibleupgrades.add(key);
 
             upgradesList[key] = {
                 ...data,
-                price: data.basePrice,
+                price: data.price,
                 bought: false,
                 dom: { btn: btn }
             };
