@@ -312,7 +312,38 @@ function checkUpgradeUnlocks() {
 elements.cookieBtn.addEventListener('click', (e) => {
     state.cookies += state.clickValue;
     updateUI();
+    createParticle(e.clientX, e.clientY);
+    createFloatingText(e.clientX, e.clientY);
 });
+
+function createParticle(x, y) {
+    const particle = document.createElement('div');
+    particle.className = 'cookie-particle';  
+    const destinationX = (Math.random() - 0.5) * 300;
+    const destinationY = (Math.random() - 0.5) * 300;
+    const rotation = Math.random() * 360;
+    particle.style.left = `${x - 15}px`; 
+    particle.style.top = `${y - 15}px`;
+    particle.style.setProperty('--x', `${destinationX}px`);
+    particle.style.setProperty('--y', `${destinationY}px`);
+    particle.style.setProperty('--r', `${rotation}deg`);
+    document.body.appendChild(particle);
+    setTimeout(() => {
+        particle.remove();
+    }, 800);
+}
+
+function createFloatingText(x, y) {
+    const text = document.createElement('div');
+    text.className = 'click-value-float';
+    text.innerText = `+${state.clickValue.toLocaleString()}`;
+    text.style.left = `${x}px`;
+    text.style.top = `${y}px`;
+    document.body.appendChild(text);
+    setTimeout(() => {
+        text.remove();
+    }, 1000);
+}
 
 elements.shopToggle.addEventListener('click', () => {
     const isOpen = elements.sidebar.classList.toggle('open');
