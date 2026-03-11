@@ -214,8 +214,9 @@ function importGame() {
 }
 
 function initShop() {
-
+    const factoryList = document.getElementById('factory-list');
     const upgradeList = document.getElementById('upgrade-list');
+
     for (const [key, data] of Object.entries(upgradeData)) {
         const btn = document.createElement('button');
         btn.className = 'upgrade-unlock-btn';
@@ -238,24 +239,29 @@ function initShop() {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'factory-item';
 
-        itemDiv.innerHTML = `
-            <div class="factory-info">
-                <img src="${data.icon}" alt="${data.name}" class="factory-icon">
-                <div class="factory-texts">
-                    <span class="factory-name">${data.name}</span>
-                    <span class="factory-desc">${data.desc}</span>
-                </div>
-            </div>
-            <div class="factory-controls">
-                <span class="factory-amount" id="${key}-amount">0</span>
-                <button id="buy-${key}" class="factory-buy-btn">
-                    Kaufen (<span id="${key}-price">${data.basePrice}</span> 
-                    <img src="img/Keks.svg" class="factory-price-icon">)
-                </button>
-            </div>
-        `;
+itemDiv.innerHTML = `
+    <div class="factory-info">
+        <img src="${data.icon}" alt="${data.name}" class="factory-icon">
+        <div class="factory-texts">
+            <span class="factory-name">${data.name}</span>
+            <span class="factory-desc">${data.desc}</span>
+        </div>
+        <div class="factory-count-badge">
+            <span class="factory-amount" id="${key}-amount">0</span>
+        </div>
+    </div>
+    <div class="factory-controls">
+        <button id="buy-${key}" class="factory-buy-btn">
+            <span class="buy-label">Kaufen</span>
+            <span class="buy-price-wrapper">
+                <span id="${key}-price">${data.basePrice}</span> 
+                <img src="img/Keks.svg" class="factory-price-icon">
+            </span>
+        </button>
+    </div>
+`;
 
-        elements.sidebar.appendChild(itemDiv);
+        factoryList.appendChild(itemDiv);
 
         upgrades[key] = {
             ...data,
