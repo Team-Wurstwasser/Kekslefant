@@ -11,11 +11,6 @@ const state = {
         snail: 1,
         elephant: 1,
         wurst: 1,
-        bakery: 1,
-        mine: 1,
-        station: 1,
-        temple: 1,
-        galaxy: 1
     },
     lastUpdate: Date.now()
 };
