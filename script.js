@@ -1,9 +1,12 @@
 let isResetting = false;
+let inputBuffer = "";
+const targetWord = "wurst";
 
 const state = {
     cookies: 0,
     totalCPS: 0,
     clickValue: 1,
+    isWurstMode: false,
     multipliers: {
         snail: 1,
         elephant: 1,
@@ -319,6 +322,13 @@ elements.cookieBtn.addEventListener('click', (e) => {
 function createParticle(x, y) {
     const particle = document.createElement('div');
     particle.className = 'cookie-particle';  
+    
+    if (state.isWurstMode) {
+        particle.style.backgroundImage = "url('img/Logo.png')";
+    } else {
+        particle.style.backgroundImage = "url('img/Keks.svg')";
+    }
+
     const destinationX = (Math.random() - 0.5) * 300;
     const destinationY = (Math.random() - 0.5) * 300;
     const rotation = Math.random() * 360;
@@ -392,6 +402,24 @@ elements.resetBtn.addEventListener('click', () => {
         hideOverlay(elements.savePopup);
         hideOverlay(elements.loadPopup);
     });
+});
+
+window.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+
+    if (key === targetWord[inputBuffer.length]) {
+        inputBuffer += key;
+    } else {
+        inputBuffer = (key === 'w') ? 'w' : "";
+    }
+
+    if (inputBuffer === targetWord) {
+        state.isWurstMode = !state.isWurstMode;
+        
+        elements.cookieBtn.src = state.isWurstMode ? "img/Logo.png" : "img/Keks.svg";
+        
+        inputBuffer = "";
+    }
 });
 
 setInterval(() => {
