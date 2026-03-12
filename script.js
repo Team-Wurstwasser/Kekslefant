@@ -38,36 +38,6 @@ const factoryData = {
         basePrice: 1000,
         cps: 50,
         icon: "img/Logo.png"
-    },
-    bakery: {
-        name: "Groß-Bäckerei",
-        basePrice: 12000,
-        cps: 125,
-        icon: "img/Logo.png"
-    },
-    mine: {
-        name: "Keks-Mine",
-        basePrice: 150000,
-        cps: 600,
-        icon: "img/Logo.png"
-    },
-    station: {
-        name: "Weltraum-Station",
-        basePrice: 1200000,
-        cps: 3500,
-        icon: "img/Logo.png"
-    },
-    temple: {
-        name: "Keks-Tempel",
-        basePrice: 25000000,
-        cps: 20000,
-        icon: "img/Logo.png"
-    },
-    galaxy: {
-        name: "Keks-Galaxie",
-        basePrice: 500000000,
-        cps: 150000,
-        icon: "img/Logo.png"
     }
 };
 
@@ -119,67 +89,6 @@ const upgradeData = {
         name: "Zuckerschock",
         desc: "ALLES produziert 2x so viel",
         price: 100000,
-        type: "globalMultiplier",
-        factor: 2,
-        icon: "img/Logo.png"
-    },
-        bakery_oven: {
-        name: "Steinbackofen",
-        desc: "Bäckereien produzieren 2x mehr",
-        price: 35000,
-        type: "multiplier",
-        target: "bakery",
-        factor: 2,
-        icon: "img/Logo.png"
-    },
-    mine_drill: {
-        name: "Diamant-Bohrer",
-        desc: "Minen sind 2.5x so effizient",
-        price: 400000,
-        type: "multiplier",
-        target: "mine",
-        factor: 2.5,
-        icon: "img/Logo.png"
-    },
-    station_orbit: {
-        name: "Stabile Umlaufbahn",
-        desc: "Weltraum-Stationen Ertrag x3",
-        price: 5000000,
-        type: "multiplier",
-        target: "station",
-        factor: 3,
-        icon: "img/Logo.png"
-    },
-    temple_blessing: {
-        name: "Keks-Segen",
-        desc: "Tempel produzieren doppelt so viel",
-        price: 75000000,
-        type: "multiplier",
-        target: "temple",
-        factor: 2,
-        icon: "img/Logo.png"
-    },
-    galaxy_collapse: {
-        name: "Materie-Kompression",
-        desc: "Galaxien sind 5x so produktiv",
-        price: 1500000000,
-        type: "multiplier",
-        target: "galaxy",
-        factor: 5,
-        icon: "img/Logo.png"
-    },
-    hyper_clicker: {
-        name: "Hyper-Klicker",
-        desc: "Klicks sind 10x stärker",
-        price: 10000000,
-        type: "clickMultiplier",
-        factor: 10,
-        icon: "img/Logo.png"
-    },
-    mega_rush: {
-        name: "Zucker-Overdrive",
-        desc: "ALLES produziert nochmals 2x so viel",
-        price: 500000000,
         type: "globalMultiplier",
         factor: 2,
         icon: "img/Logo.png"
