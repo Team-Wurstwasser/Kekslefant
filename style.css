@@ -356,7 +356,7 @@ body {
     display: none;
     justify-content: center;
     align-items: center;
-    z-index: 4000;
+    z-index: 8000;
     backdrop-filter: blur(4px);
 }
 
@@ -405,7 +405,7 @@ body {
     resize: none;
 }
 
-#close-settings, #close-save, #close-load {
+#close-settings, #close-save, #close-load, #close-upgrade-pop{
     background: none;
     border: none;
     cursor: pointer;
