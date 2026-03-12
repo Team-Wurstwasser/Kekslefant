@@ -114,7 +114,14 @@ const elements = {
     loadCodeField: document.getElementById('load-code-field'),
     confirmLoadBtn: document.getElementById('confirm-load'),
     closeSave: document.getElementById('close-save'),
-    closeLoad: document.getElementById('close-load')
+    closeLoad: document.getElementById('close-load'),
+    upgradePopup: document.getElementById('upgrade-popup'),
+    closeUpgradePop: document.getElementById('close-upgrade-pop'),
+    confirmUpgradeBuy: document.getElementById('confirm-upgrade-buy'),
+    upPopName: document.getElementById('up-pop-name'),
+    upPopIcon: document.getElementById('up-pop-icon'),
+    upPopDesc: document.getElementById('up-pop-desc'),
+    upPopPrice: document.getElementById('up-pop-price')
 };
 
 function formatNumber(num) {
@@ -134,7 +141,7 @@ function formatNumber(num) {
 
     let shortValue = (num / Math.pow(1000, suffixNum));
     
-    return shortValue.toFixed(2).replace(/\.00$/, '') + " " + suffixes[suffixNum];
+    return shortValue.toFixed(2).replace(/\.?0+$/, '') + " " + suffixes[suffixNum];
 }
 
 function calculateTotalCPS() {
@@ -335,7 +342,15 @@ function checkUpgradeUnlocks() {
                 dom: { btn: btn }
             };
 
-            btn.addEventListener('click', () => buyUpgrade(key));
+            btn.addEventListener('click', () => {
+                currentUpgradeToBuy = key;
+                elements.upPopName.innerText = data.name;
+                elements.upPopIcon.src = data.icon;
+                elements.upPopDesc.innerText = data.desc;
+                elements.upPopPrice.innerText = `Preis: ${formatNumber(data.price)} Cookies`;
+                elements.confirmUpgradeBuy.disabled = state.cookies < data.price;
+                showOverlay(elements.upgradePopup);
+            });
         }
     }
 }
@@ -430,6 +445,15 @@ elements.resetBtn.addEventListener('click', () => {
         hideOverlay(elements.savePopup);
         hideOverlay(elements.loadPopup);
     });
+});
+
+elements.closeUpgradePop.addEventListener('click', () => hideOverlay(elements.upgradePopup));
+elements.confirmUpgradeBuy.addEventListener('click', () => {
+    if (currentUpgradeToBuy && state.cookies >= upgradeData[currentUpgradeToBuy].price) {
+        buyUpgrade(currentUpgradeToBuy);
+        hideOverlay(elements.upgradePopup);
+        currentUpgradeToBuy = null;
+    }
 });
 
 window.addEventListener('keydown', (e) => {
