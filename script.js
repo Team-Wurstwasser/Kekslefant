@@ -10,7 +10,8 @@ const state = {
     multipliers: {
         snail: 1,
         elephant: 1,
-        wurst: 1 },
+        wurst: 1,
+    },
     lastUpdate: Date.now()
 };
 
@@ -19,17 +20,20 @@ const factoryData = {
         name: "Schnecken-Zucht",
         basePrice: 10,
         cps: 1,
-        icon: "img/Schnecke.png" },
+        icon: "img/Schnecke.png"
+    },
     elephant: {
         name: "Elefanten-Fabrik",
         basePrice: 100,
         cps: 10,
-        icon: "img/Elefant.png" },
+        icon: "img/Elefant.png"
+    },
     wurst: {
         name: "Wurst-Fabrik",
         basePrice: 1000,
         cps: 50,
-        icon: "img/Logo.png" }
+        icon: "img/Logo.png"
+    }
 };
 
 const upgradeData = {
@@ -39,15 +43,16 @@ const upgradeData = {
         price: 50,
         type: "clickBoost", 
         boost: 1,
-        icon: "img/Keks.svg" },
-    
+        icon: "img/Keks.svg"
+    },
     click_hammer: {
         name: "Keks-Hammer",
         desc: "Jeder Klick ist 5x so stark",
         price: 5000,
         type: "clickMultiplier",
         factor: 5,
-        icon: "img/Logo.png" },
+        icon: "img/Logo.png"
+    },
     snail_turbo: {
         name: "Turbo-Schnecken",
         desc: "Schnecken sind 3x so schnell",
@@ -55,7 +60,8 @@ const upgradeData = {
         type: "multiplier",
         target: "snail", 
         factor: 3,
-        icon: "img/Schnecke.png" },
+        icon: "img/Schnecke.png"
+    },
     elephant_energy: {
         name: "Elefanten-Energy",
         desc: "Elefanten arbeiten 2x so hart",
@@ -63,7 +69,8 @@ const upgradeData = {
         type: "multiplier",
         target: "elephant",
         factor: 2,
-        icon: "img/Logo.png" },
+        icon: "img/Logo.png"
+    },
     wurst_overclock: {
         name: "Wurst-Übertaktung",
         desc: "Die Wurst-Fabrik läuft auf 400%",
@@ -71,14 +78,16 @@ const upgradeData = {
         type: "multiplier",
         target: "wurst",
         factor: 4,
-        icon: "img/Logo.png" },
+        icon: "img/Logo.png"
+    },
     sugar_rush: {
         name: "Zuckerschock",
         desc: "ALLES produziert 2x so viel",
         price: 100000,
         type: "globalMultiplier",
         factor: 2,
-        icon: "img/Logo.png" }
+        icon: "img/Logo.png"
+    }
 };
 
 const factoryList = {}; 
@@ -108,6 +117,26 @@ const elements = {
     closeLoad: document.getElementById('close-load')
 };
 
+function formatNumber(num) {
+    if (num < 1000) return Math.floor(num).toString();
+
+    const suffixes = [
+        "", "k", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", 
+        "Dc", "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod", 
+        "Vg", "Uvg", "Dvg", "Tvg", "Qavg", "Qivg", "Sxvg", "Spvg", "Ocvg", "Novg"
+    ];
+
+    const suffixNum = Math.floor(Math.log10(num) / 3);
+
+    if (suffixNum >= suffixes.length) {
+        return num.toExponential(2).replace('+', ' ');
+    }
+
+    let shortValue = (num / Math.pow(1000, suffixNum));
+    
+    return shortValue.toFixed(2).replace(/\.00$/, '') + " " + suffixes[suffixNum];
+}
+
 function calculateTotalCPS() {
     state.totalCPS = Object.keys(factoryData).reduce((acc, key) => {
         const upg = factoryList[key];
@@ -116,18 +145,17 @@ function calculateTotalCPS() {
 }
 
 function updateUI() {
-    elements.cookieDisplay.innerText = Math.floor(state.cookies).toLocaleString();
-    elements.cpsDisplay.innerText = state.totalCPS.toLocaleString();
+    elements.cookieDisplay.innerText = formatNumber(state.cookies);
+    elements.cpsDisplay.innerText = formatNumber(state.totalCPS);
 
     for (const key in factoryList) {
         const upg = factoryList[key];
         const currentMulti = state.multipliers[key] || 1;
         const effectiveCPS = upg.cps * currentMulti;
 
-        upg.dom.amount.innerText = upg.amount;
-        upg.dom.price.innerText = Math.ceil(upg.price).toLocaleString();
-        
-        upg.dom.desc.innerText = `+${effectiveCPS.toLocaleString()} Cookies/s`;
+        upg.dom.amount.innerText = upg.amount;    
+        upg.dom.price.innerText = formatNumber(upg.price);    
+        upg.dom.desc.innerText = `+${formatNumber(effectiveCPS)} Cookies/s`;
 
         upg.dom.btn.disabled = state.cookies < upg.price;
     }
@@ -294,7 +322,7 @@ function checkUpgradeUnlocks() {
         if (state.cookies >= data.price * 0.8) {
             const btn = document.createElement('button');
             btn.className = 'upgrade-unlock-btn';
-            btn.title = `${data.name}: ${data.desc} - Kosten: ${data.price}`;
+            btn.title = `${data.name}: ${data.desc} - Kosten: ${formatNumber(data.price)}`;
             btn.innerHTML = `<img src="${data.icon}" class="btn-icon">`;
             
             upgradeContainer.appendChild(btn);
@@ -346,7 +374,7 @@ function createParticle(x, y) {
 function createFloatingText(x, y) {
     const text = document.createElement('div');
     text.className = 'click-value-float';
-    text.innerText = `+${state.clickValue.toLocaleString()}`;
+    text.innerText = `+${formatNumber(state.clickValue)}`;
     text.style.left = `${x}px`;
     text.style.top = `${y}px`;
     document.body.appendChild(text);
