@@ -136,12 +136,12 @@ function formatNumber(num) {
     const suffixNum = Math.floor(Math.log10(num) / 3);
 
     if (suffixNum >= suffixes.length) {
-        return num.toExponential(2).replace('+', ' ');
+        return num.toExponential(2).replace('+', '');
     }
 
-    let shortValue = (num / Math.pow(1000, suffixNum));
-    
-    return shortValue.toFixed(2).replace(/\.?0+$/, '') + " " + suffixes[suffixNum];
+    let shortValue = Math.floor(num / Math.pow(1000, suffixNum) * 100) / 100;
+
+    return shortValue.toString() + " " + suffixes[suffixNum];
 }
 
 function calculateTotalCPS() {
