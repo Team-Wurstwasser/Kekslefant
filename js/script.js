@@ -61,7 +61,6 @@ const upgradeData = {
 const factoryList = {};
 const upgradesList = {};
 const visibleupgrades = new Set();
-
 let currentUpgradeToBuy = null;
 
 const elements = {
@@ -99,9 +98,9 @@ function formatNumber(bigNum) {
     if (num < 1000) return bigNum.toFixed(0);
 
     const suffixes = [
-        "", "k", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "Dc", "Ud",
-        "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod", "Vg", "Uvg", "Dvg", 
-        "Tvg", "Qavg", "Qivg", "Sxvg", "Spvg", "Ocvg", "Novg"
+        "", "k", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", 
+        "Dc", "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod", 
+        "Vg", "Uvg", "Dvg", "Tvg", "Qavg", "Qivg", "Sxvg", "Spvg", "Ocvg", "Novg"
     ];
     
     const suffixNum = Math.floor(Math.log10(num) / 3);
@@ -129,7 +128,7 @@ function updateUI() {
         const upg = factoryList[key];
         const currentCPS = upg.cps.times(upg.multiplier);
 
-        upg.dom.amount.innerText = upg.amount.toString();
+        upg.dom.amount.innerText = formatNumber(upg.amount);
         upg.dom.price.innerText = formatNumber(upg.price);
         upg.dom.desc.innerText = `+${formatNumber(currentCPS)} Cookies/s`;
         upg.dom.btn.disabled = state.cookies.lt(upg.price);
@@ -141,8 +140,8 @@ function buyFactory(key) {
     const upg = factoryList[key];
     if (state.cookies.gte(upg.price)) {
         state.cookies = state.cookies.minus(upg.price);
-        upg.amount++;
-        upg.price = upg.basePrice.times(new Big(1.15).pow(upg.amount)).round(0, 0);
+        upg.amount = upg.amount.plus(1);
+        upg.price = upg.basePrice.times(new Big(1.15).pow(Number(upg.amount.toString()))).round(0, 0);
 
         calculateTotalCPS();
         updateUI();
@@ -160,15 +159,26 @@ function buyUpgrade(key) {
         const boost = new Big(spec.boost || 1);
 
         switch (spec.type) {
-            case "clickBoost": state.clickValue = state.clickValue.plus(boost); break;
-            case "clickMultiplier": state.clickValue = state.clickValue.times(factor); break;
-            case "multiplier": factoryList[spec.target].multiplier = factoryList[spec.target].multiplier.times(factor); break;
+            case "clickBoost":
+                state.clickValue = state.clickValue.plus(boost);
+                break;
+            
+            case "clickMultiplier":
+                state.clickValue = state.clickValue.times(factor);
+                break;
+
+            case "multiplier":
+                factoryList[spec.target].multiplier = factoryList[spec.target].multiplier.times(factor);
+                break;
+
             case "globalMultiplier":
-                for (const f in factoryList) factoryList[f].multiplier = factoryList[f].multiplier.times(factor);
+                Object.keys(factoryData.multiplier).forEach(m => {
+                    factoryList[m].multiplier = factoryList[m].multiplier.times(factor);
+                });
                 break;
         }
 
-        spec.dom.btn.remove();
+        spec.dom.btn.remove(); 
         calculateTotalCPS();
         updateUI();
         saveGame();
@@ -179,7 +189,7 @@ function getSaveData() {
     const upgradeAmounts = {};
     const multipliers = {};
     for (const key in factoryList) {
-        upgradeAmounts[key] = factoryList[key].amount;
+        upgradeAmounts[key] = factoryList[key].amount.toString();
         multipliers[key] = factoryList[key].multiplier.toString();
     }
     const boughtSpecials = {};
@@ -202,9 +212,9 @@ function applySaveData(data) {
         if (data.upgradeAmounts) {
             for (const key in data.upgradeAmounts) {
                 if (factoryList[key]) {
-                    const amount = data.upgradeAmounts[key];
+                    const amount = new Big(data.upgradeAmounts[key]);
                     factoryList[key].amount = amount;
-                    factoryList[key].price = factoryList[key].basePrice.times(new Big(1.15).pow(amount)).round(0, 0);
+                    factoryList[key].price = factoryList[key].basePrice.times(new Big(1.15).pow(Number(amount.toString()))).round(0, 0);
                 }
             }
         }
@@ -282,15 +292,25 @@ function initShop() {
 
 function checkUpgradeUnlocks() {
     const upgradeContainer = document.getElementById('upgrade-list');
+
     for (const [key, data] of Object.entries(upgradeData)) {
         if (upgradesList[key]?.bought || visibleupgrades.has(key)) continue;
+
         if (state.cookies.gte(new Big(data.price).times(0.8))) {
             const btn = document.createElement('button');
             btn.className = 'upgrade-unlock-btn';
             btn.innerHTML = `<img src="${data.icon}" class="btn-icon">`;
+
             upgradeContainer.appendChild(btn);
             visibleupgrades.add(key);
-            upgradesList[key] = { ...data, price: new Big(data.price), bought: false, dom: { btn } };
+
+            upgradesList[key] = {
+                ...data,
+                price: new Big(data.price),
+                bought: false,
+                dom: { btn }
+            };
+
             btn.addEventListener('click', () => {
                 currentUpgradeToBuy = key;
                 elements.upPopName.innerText = data.name;
@@ -347,34 +367,43 @@ const hideOverlay = (o) => o.style.display = 'none';
 
 elements.settingsBtn.addEventListener('click', () => showOverlay(elements.settingsOverlay));
 elements.closeSettings.addEventListener('click', () => hideOverlay(elements.settingsOverlay));
+
 elements.exportBtn.addEventListener('click', () => {
     elements.saveCodeField.value = btoa(JSON.stringify(getSaveData()));
     showOverlay(elements.savePopup);
 });
+
 elements.importBtn.addEventListener('click', () => showOverlay(elements.loadPopup));
+
 elements.confirmLoadBtn.addEventListener('click', () => {
     const code = elements.loadCodeField.value.trim();
     if (!code) return;
     try {
-        applySaveData(JSON.parse(atob(code)));
+        const data = JSON.parse(atob(code));
+        applySaveData(data);
         saveGame();
         hideOverlay(elements.loadPopup);
         hideOverlay(elements.settingsOverlay);
-    } catch (e) { alert("Fehler!"); }
+        alert("Spielstand geladen!");
+    } catch (e) {
+        alert("Ungültiger Code!");
+    }
 });
 
 elements.resetBtn.addEventListener('click', () => {
-    if (confirm("Reset?")) {
+    if (confirm("Wirklich alles löschen? Fortschritt geht verloren!")) {
         isResetting = true;
         localStorage.removeItem('kekslefant_save');
         location.reload();
     }
 });
 
-[elements.closeSave, elements.closeLoad].forEach(btn => btn.addEventListener('click', () => {
-    hideOverlay(elements.savePopup);
-    hideOverlay(elements.loadPopup);
-}));
+[elements.closeSave, elements.closeLoad].forEach(btn => {
+    btn.addEventListener('click', () => {
+        hideOverlay(elements.savePopup);
+        hideOverlay(elements.loadPopup);
+    });
+});
 
 elements.closeUpgradePop.addEventListener('click', () => hideOverlay(elements.upgradePopup));
 elements.confirmUpgradeBuy.addEventListener('click', () => {
