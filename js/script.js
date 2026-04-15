@@ -240,6 +240,13 @@ function applySaveData(data) {
 
 function saveGame() {
     if (isResetting) return;
+
+    const hasNoFactory = Object.values(factoryList).every(factory => factory.amount.eq(0));
+
+    if (state.cookies.eq(0) && hasNoFactory) {
+        return; 
+    }
+
     localStorage.setItem('kekslefant_save', JSON.stringify(getSaveData()));
 }
 
