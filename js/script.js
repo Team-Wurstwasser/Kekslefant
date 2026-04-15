@@ -216,17 +216,24 @@ function applySaveData(data) {
         if (data.upgradeAmounts) {
             for (const key in data.upgradeAmounts) {
                 if (factoryList[key]) {
-                    const amount = new Big(data.upgradeAmounts[key]);
+                    const amount = new Big(data.upgradeAmounts[key] || 0);
                     factoryList[key].amount = amount;
-                    factoryList[key].price = factoryList[key].basePrice.times(new Big(1.15).pow(Number(amount.toString()))).round(0, 0);
+                    
+                    factoryList[key].price = factoryList[key].basePrice.times(
+                        new Big(1.15).pow(parseInt(amount.toString()))
+                    ).round(0, 0);
                 }
             }
         }
+
         if (data.multipliers) {
             for (const key in data.multipliers) {
-                if (factoryList[key]) factoryList[key].multiplier = new Big(data.multipliers[key]);
+                if (factoryList[key]) {
+                    factoryList[key].multiplier = new Big(data.multipliers[key] || 1);
+                }
             }
         }
+
         if (data.boughtSpecials) {
             for (const key in data.boughtSpecials) {
                 if (data.boughtSpecials[key] && upgradesList[key]) {
@@ -235,10 +242,11 @@ function applySaveData(data) {
                 }
             }
         }
+
         calculateTotalCPS();
         updateUI();
-    } catch (e) {
-        console.error(e);
+    } catch (e) { 
+        console.error("Fehler beim Laden des Spielstands:", e); 
     }
 }
 
