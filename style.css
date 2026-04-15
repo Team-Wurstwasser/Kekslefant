@@ -87,7 +87,7 @@ body {
     pointer-events: none;
     font-size: 24px;
     font-weight: bold;
-    color: #5d4037; /* Dunkelbraun passend zum Design */
+    color: #5d4037;
     text-shadow: 2px 2px 0px #fff;
     z-index: 10000;
     animation: float-up 1s ease-out forwards;
