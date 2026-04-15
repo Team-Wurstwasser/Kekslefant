@@ -94,21 +94,26 @@ const elements = {
 };
 
 function formatNumber(bigNum) {
-    const num = Number(bigNum.toString());
-    if (num < 1000) return bigNum.toFixed(0);
+    if (!(bigNum instanceof Big)) bigNum = new Big(bigNum || 0);
+
+    if (bigNum.lt(1000)) return bigNum.toFixed(0);
 
     const suffixes = [
         "", "k", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", 
         "Dc", "Ud", "Dd", "Td", "Qad", "Qid", "Sxd", "Spd", "Ocd", "Nod", 
         "Vg", "Uvg", "Dvg", "Tvg", "Qavg", "Qivg", "Sxvg", "Spvg", "Ocvg", "Novg"
     ];
-    
-    const suffixNum = Math.floor(Math.log10(num) / 3);
 
-    if (suffixNum >= suffixes.length) return num.toExponential(2).replace('+', '');
+    const parts = bigNum.toExponential().split('e');
+    const exponent = parseInt(parts[1]);
+    const suffixIndex = Math.floor(exponent / 3);
 
-    const shortValue = bigNum.div(new Big(10).pow(suffixNum * 3)).toFixed(2);
-    return shortValue + " " + suffixes[suffixNum];
+    if (suffixIndex >= suffixes.length) {
+        return bigNum.toExponential(2).replace('+', '');
+    }
+
+    const shortValue = bigNum.div(new Big(10).pow(suffixIndex * 3)).toFixed(2);
+    return shortValue + " " + suffixes[suffixIndex];
 }
 
 function calculateTotalCPS() {
