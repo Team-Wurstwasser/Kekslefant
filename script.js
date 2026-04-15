@@ -7,87 +7,55 @@ const state = {
     totalCPS: 0,
     clickValue: 1,
     isWurstMode: false,
-    multipliers: {
-        snail: 1,
-        elephant: 1,
-        wurst: 1,
-    },
     lastUpdate: Date.now()
 };
 
 const factoryData = {
-    snail: {
-        name: "Schnecken-Zucht",
+    huette: {
+        name: "Hefe Hütte",
         basePrice: 10,
         cps: 1,
-        icon: "img/Schnecke.png"
+        icon: "img/Huette.png"
     },
-    elephant: {
-        name: "Elefanten-Fabrik",
+    kristall: {
+        name: "Kristall-Konditorei",
         basePrice: 100,
         cps: 10,
-        icon: "img/Elefant.png"
+        icon: "img/Kristall.png"
     },
-    wurst: {
-        name: "Wurst-Fabrik",
+    plasma: {
+        name: "Plasma-Keks-Generator",
         basePrice: 1000,
         cps: 50,
-        icon: "img/Logo.png"
+        icon: "img/Plasma.png"
+    },
+    labor: {
+        name: "Licht-Keks-Labor",
+        basePrice: 10000,
+        cps: 100,
+        icon: "img/Labor.png"
+    },
+    former: {
+        name: "Makro-Keks-Former",
+        basePrice: 1000000,
+        cps: 1000,
+        icon: "img/Former.png"
+    },
+    ofen: {
+        name: "Schwerkraft-Keks-Ofen",
+        basePrice: 100000000,
+        cps: 100000,
+        icon: "img/Ofen.png"
+    },
+    sonde: {
+        name: "Back-Sonde",
+        basePrice: 1000000000,
+        cps: 1000000,
+        icon: "img/Sonde.png"
     }
 };
 
 const upgradeData = {
-    stronger_fingers: {
-        name: "Starke Finger",
-        desc: "Klicks bringen +1", 
-        price: 50,
-        type: "clickBoost", 
-        boost: 1,
-        icon: "img/Keks.svg"
-    },
-    click_hammer: {
-        name: "Keks-Hammer",
-        desc: "Jeder Klick ist 5x so stark",
-        price: 5000,
-        type: "clickMultiplier",
-        factor: 5,
-        icon: "img/Logo.png"
-    },
-    snail_turbo: {
-        name: "Turbo-Schnecken",
-        desc: "Schnecken sind 3x so schnell",
-        price: 250, 
-        type: "multiplier",
-        target: "snail", 
-        factor: 3,
-        icon: "img/Schnecke.png"
-    },
-    elephant_energy: {
-        name: "Elefanten-Energy",
-        desc: "Elefanten arbeiten 2x so hart",
-        price: 2500,
-        type: "multiplier",
-        target: "elephant",
-        factor: 2,
-        icon: "img/Logo.png"
-    },
-    wurst_overclock: {
-        name: "Wurst-Übertaktung",
-        desc: "Die Wurst-Fabrik läuft auf 400%",
-        price: 25000,
-        type: "multiplier",
-        target: "wurst",
-        factor: 4,
-        icon: "img/Logo.png"
-    },
-    sugar_rush: {
-        name: "Zuckerschock",
-        desc: "ALLES produziert 2x so viel",
-        price: 100000,
-        type: "globalMultiplier",
-        factor: 2,
-        icon: "img/Logo.png"
-    }
 };
 
 const factoryList = {}; 
@@ -147,7 +115,7 @@ function formatNumber(num) {
 function calculateTotalCPS() {
     state.totalCPS = Object.keys(factoryData).reduce((acc, key) => {
         const upg = factoryList[key];
-        return acc + (upg.amount * upg.cps * (state.multipliers[key] || 1));
+        return acc + (upg.amount * upg.cps * (factoryList[key].multiplier));
     }, 0);
 }
 
@@ -157,12 +125,12 @@ function updateUI() {
 
     for (const key in factoryList) {
         const upg = factoryList[key];
-        const currentMulti = state.multipliers[key] || 1;
-        const effectiveCPS = upg.cps * currentMulti;
+        const currentMulti = factoryList[key].multiplier;
+        const CPS = upg.cps * currentMulti;
 
-        upg.dom.amount.innerText = upg.amount;    
+        upg.dom.amount.innerText = formatNumber(upg.amount);    
         upg.dom.price.innerText = formatNumber(upg.price);    
-        upg.dom.desc.innerText = `+${formatNumber(effectiveCPS)} Cookies/s`;
+        upg.dom.desc.innerText = `+${formatNumber(CPS)} Cookies/s`;
 
         upg.dom.btn.disabled = state.cookies < upg.price;
     }
@@ -199,12 +167,12 @@ function buyUpgrade(key) {
                 break;
 
             case "multiplier":
-                state.multipliers[spec.target] *= (spec.factor || 2);
+                factoryList[spec.target].multiplier *= (spec.factor || 2);
                 break;
 
             case "globalMultiplier":
-                Object.keys(state.multipliers).forEach(m => {
-                    state.multipliers[m] *= (spec.factor || 2);
+                Object.keys(factoryData.multiplier).forEach(m => {
+                    factoryList[m].multiplier *= (spec.factor || 2);
                 });
                 break;
         }
@@ -220,13 +188,16 @@ function getSaveData() {
     const upgradeAmounts = {};
     for (const key in factoryList) upgradeAmounts[key] = factoryList[key].amount;
 
+    const multipliers = {};
+    for (const key in factoryList) multipliers[key] = factoryList[key].multiplier;
+
     const boughtSpecials = {};
     for (const key in upgradesList) boughtSpecials[key] = upgradesList[key].bought;
 
     return {
         cookies: state.cookies,
         clickValue: state.clickValue,
-        multipliers: state.multipliers,
+        multipliers,
         upgradeAmounts,
         boughtSpecials
     };
@@ -236,7 +207,6 @@ function applySaveData(data) {
     try {
         state.cookies = data.cookies || 0;
         state.clickValue = data.clickValue || 1;
-        state.multipliers = data.multipliers || { snail: 1, elephant: 1, wurst: 1 };
 
         if (data.upgradeAmounts) {
             for (const key in data.upgradeAmounts) {
@@ -244,6 +214,14 @@ function applySaveData(data) {
                     const amount = data.upgradeAmounts[key];
                     factoryList[key].amount = amount;
                     factoryList[key].price = Math.round(factoryList[key].basePrice * Math.pow(1.15, amount));
+                }
+            }
+        }
+
+        if (data.multipliers) {
+            for (const key in data.multipliers) {
+                if (factoryList[key]) {
+                    factoryList[key].multiplier = data.multipliers[key];
                 }
             }
         }
@@ -309,6 +287,7 @@ function initShop() {
             ...data,
             amount: 0,
             price: data.basePrice,
+            multiplier: 1,
             dom: {
                 btn: document.getElementById(`buy-${key}`),
                 price: document.getElementById(`${key}-price`),
