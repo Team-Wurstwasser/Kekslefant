@@ -415,65 +415,57 @@ function buyUpgrade(key) {
 }
 
 function getSaveData() {
-    const upgradeAmounts = {};
-    const multipliers = {};
-    for (const key in factoryList) {
-        upgradeAmounts[key] = factoryList[key].amount.toString();
-        multipliers[key] = factoryList[key].multiplier.toString();
-    }
-    const boughtSpecials = {};
-    for (const key in upgradesList) boughtSpecials[key] = upgradesList[key].bought;
-
     return {
-        cookies: state.cookies.toString(),
-        clickValue: state.clickValue.toString(),
-        multipliers,
-        upgradeAmounts,
-        boughtSpecials,
-        visibleUpgrades: Array.from(visibleupgrades)
+        stats: {
+            cookies: state.cookies.toString(),
+            clickValue: state.clickValue.toString()
+        },
+        factories: Object.keys(factoryList).reduce((all, key) => {
+            all[key] = {
+                a: factoryList[key].amount.toString(),
+                m: factoryList[key].multiplier.toString()
+            };
+            return all;
+        }, {}),
+        upgrades: {
+            bought: Object.keys(upgradesList).filter(key => upgradesList[key].bought),
+            visible: Array.from(visibleupgrades)
+        }
     };
 }
 
 function applySaveData(data) {
-    try {
-        state.cookies = new Big(data.cookies || 0);
-        state.clickValue = new Big(data.clickValue || 1);
+    if (!data) return;
 
-        if (data.upgradeAmounts) {
-            for (const key in data.upgradeAmounts) {
+    try {
+        state.cookies = new Big(data.stats?.cookies || 0);
+        state.clickValue = new Big(data.stats?.clickValue || 1);
+
+        if (data.factories) {
+            for (const key in data.factories) {
                 if (factoryList[key]) {
-                    const amount = new Big(data.upgradeAmounts[key] || 0);
-                    factoryList[key].amount = amount;
+                    const fData = data.factories[key];
+                    factoryList[key].amount = new Big(fData.a || 0);
+                    factoryList[key].multiplier = new Big(fData.m || 1);
                     factoryList[key].price = factoryList[key].basePrice.times(
-                        new Big(1.15).pow(parseInt(amount.toString()))
+                        new Big(1.15).pow(parseInt(factoryList[key].amount.toString()))
                     ).round(0, 0);
                 }
             }
         }
 
-        if (data.multipliers) {
-            for (const key in data.multipliers) {
-                if (factoryList[key]) {
-                    factoryList[key].multiplier = new Big(data.multipliers[key] || 1);
-                }
-            }
-        }
-
-        if (data.boughtSpecials) {
-            for (const key in data.boughtSpecials) {
-                if (data.boughtSpecials[key] && upgradesList[key]) {
+        if (data.upgrades?.bought) {
+            data.upgrades.bought.forEach(key => {
+                if (upgradesList[key]) {
                     upgradesList[key].bought = true;
-                    if (upgradesList[key].dom && upgradesList[key].dom.btn) {
-                        upgradesList[key].dom.btn.remove();
-                    }
                 }
-            }
+            });
         }
 
-        if (data.visibleUpgrades) {
-            visibleupgrades.clear();
-            data.visibleUpgrades.forEach(key => {
-                if (!upgradesList[key].bought) {
+        visibleupgrades.clear();
+        if (data.upgrades?.visible) {
+            data.upgrades.visible.forEach(key => {
+                if (upgradesList[key] && !upgradesList[key].bought) {
                     visibleupgrades.add(key);
                 }
             });
@@ -481,8 +473,8 @@ function applySaveData(data) {
 
         calculateTotalCPS();
         updateUI();
-    } catch (e) { 
-        console.error("Fehler beim Laden des Spielstands:", e); 
+    } catch (e) {
+        console.error("Fehler beim Laden:", e);
     }
 }
 
