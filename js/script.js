@@ -145,7 +145,9 @@ function buyFactory(key) {
     if (state.cookies.gte(upg.price)) {
         state.cookies = state.cookies.minus(upg.price);
         upg.amount = upg.amount.plus(1);
-        upg.price = upg.basePrice.times(new Big(1.15).pow(Number(upg.amount.toString()))).round(0, 0);
+        upg.price = upg.basePrice.times(
+            new Big(1.15).pow(parseInt(upg.amount.toString()))
+        ).round(0, 0);
 
         calculateTotalCPS();
         updateUI();
@@ -295,8 +297,8 @@ function initShop() {
         factoryContainer.appendChild(itemDiv);
         factoryList[key] = {
             ...data,
-            amount: 0,
-            price: data.basePrice,
+            amount: new Big(0),
+            price: new Big(data.basePrice),
             multiplier: new Big(1),
             dom: {
                 btn: document.getElementById(`buy-${key}`),
