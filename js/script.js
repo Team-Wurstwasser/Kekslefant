@@ -95,7 +95,6 @@ const elements = {
 
 function formatNumber(bigNum) {
     if (!(bigNum instanceof Big)) bigNum = new Big(bigNum || 0);
-
     if (bigNum.lt(1000)) return bigNum.toFixed(0);
 
     const suffixes = [
