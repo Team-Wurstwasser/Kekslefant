@@ -4,8 +4,10 @@ const targetWord = "wurst";
 
 const state = {
     cookies: new Big(0),
-    totalCPS: new Big(0),
     clickValue: new Big(1),
+    rebirthPoints: new Big(0),
+    totalRebirths: new Big(0),
+    lifetimeCookies: new Big(0),
     isWurstMode: false,
     lastUpdate: Date.now()
 };
@@ -36,6 +38,8 @@ const elements = {
     confirmLoadBtn: document.getElementById('confirm-load'),
     closeSave: document.getElementById('close-save'),
     closeLoad: document.getElementById('close-load'),
+    rebirthInfo: document.getElementById('rebirth-info'),
+    rebirthBtn: document.getElementById('rebirth-btn'),
     upgradePopup: document.getElementById('upgrade-popup'),
     closeUpgradePop: document.getElementById('close-upgrade-pop'),
     confirmUpgradeBuy: document.getElementById('confirm-upgrade-buy'),
@@ -60,33 +64,102 @@ function formatNumber(num) {
     const suffixIndex = Math.floor(exponent / 3);
 
     if (suffixIndex >= suffixes.length) {
-        return num.toExponential(2).replace('+', '');
+        return num.toExponential(2).replace('+', '').replace('.', ',');
     }
 
-    const shortValue = num.div(new Big(10).pow(suffixIndex * 3)).toFixed(2);
+    const shortValue = num.div(new Big(10).pow(suffixIndex * 3)).toFixed(2).replace('.', ',');
     return shortValue + " " + suffixes[suffixIndex];
 }
 
-function calculateTotalCPS() {
+function formatPerSecond(num) {
+    if (!(num instanceof Big)) num = new Big(num || 0);
+
+    if (num.lt(1000)) {
+        return num.toFixed(2).replace('.', ',');
+    }
+
+    return formatNumber(num).replace('.', ',');
+}
+
+function getRebirthPoints() {
+    const RebirthPoints = state.lifetimeCookies.div(rebirthConfig.baseCookies).sqrt().round(0, 0);
+    return RebirthPoints.gt(state.rebirthPoints) ? RebirthPoints.minus(state.rebirthPoints) : new Big(0);
+}
+
+function performRebirth() {
+    const gain = getRebirthPoints();
+    if (gain.lte(0)) {
+        alert("Nicht genug Fortschritt für ein Rebirth.");
+        return;
+    }
+
+    if (!confirm(`Wirklich Rebirth ausführen? Du erhältst +${gain.toString()} Rebirth-Punkte und setzt den normalen Fortschritt zurück.`)) {
+        return;
+    }
+
+    state.rebirthPoints = state.rebirthPoints.plus(gain);
+    state.totalRebirths = state.totalRebirths.plus(1);
+    state.cookies = new Big(0);
+    state.clickValue = new Big(1);
+
+    for (const key in factoryList) {
+        factoryList[key].amount = new Big(0);
+        factoryList[key].multiplier = new Big(1);
+        factoryList[key].price = new Big(factoryList[key].basePrice);
+    }
+
+    for (const key in upgradesList) {
+        const upg = upgradesList[key];
+        upg.bought = false;
+        if (upg.dom.btn) {
+            upg.dom.btn.remove();
+            upg.dom.btn = null;
+        }
+    }
+
+    visibleupgrades.clear();
+    updateUI();
+    saveGame();
+    hideOverlay(elements.settingsOverlay);
+
+    alert(`Rebirth abgeschlossen! +${gain.toString()} Punkte erhalten.`);
+}
+
+function getTotalCPS() {
     let total = new Big(0);
     for (const key in factoryList) {
         const item = factoryList[key];
         total = total.plus(new Big(item.amount).times(item.cps).times(item.multiplier));
     }
-    state.totalCPS = total;
+    return total.times(getRebirthMultiplier());
+}
+
+function getRebirthMultiplier() {
+    return new Big(1).plus(state.rebirthPoints.times(rebirthConfig.bonusPerPoint));
+}
+
+function getEffectiveClickValue() {
+    return state.clickValue.times(getRebirthMultiplier());
 }
 
 function updateUI() {
     elements.cookieDisplay.innerText = formatNumber(state.cookies);
-    elements.cpsDisplay.innerText = formatNumber(state.totalCPS);
+    elements.cpsDisplay.innerText = formatPerSecond(getTotalCPS());
+    const rebirthMultiplier = getRebirthMultiplier();
+
+    const rebirthBonusPercent = state.rebirthPoints.times(rebirthConfig.bonusPerPoint).times(100).round(0, 0);
+    const potentialGain = getRebirthPoints();
+    elements.rebirthInfo.innerText = `Rebirth: ${formatNumber(state.rebirthPoints)} Punkte (+${rebirthBonusPercent.toString()}%)`;
+    elements.rebirthBtn.innerText = `Rebirth (+${formatNumber(potentialGain)})`;
+    elements.rebirthBtn.disabled = potentialGain.lte(0);
 
     for (const key in factoryList) {
         const upg = factoryList[key];
-        const currentCPS = upg.cps.times(upg.multiplier);
+        const currentCPS = upg.cps.times(upg.multiplier).times(rebirthMultiplier);
 
         upg.dom.amount.innerText = formatNumber(upg.amount);
         upg.dom.price.innerText = formatNumber(upg.price);
-        upg.dom.desc.innerText = `+${formatNumber(currentCPS)} Cookies/s`;
+        upg.dom.desc.innerText = `+${formatPerSecond(currentCPS)} Cookies/s`;
         upg.dom.btn.disabled = state.cookies.lt(upg.price);
     }
     checkUpgradeUnlocks();
@@ -101,7 +174,6 @@ function buyFactory(key) {
             new Big(1.15).pow(parseInt(upg.amount.toString()))
         ).round(0, 0);
 
-        calculateTotalCPS();
         updateUI();
         saveGame();
     }
@@ -142,7 +214,6 @@ function buyUpgrade(key) {
         }
         visibleupgrades.delete(key);
 
-        calculateTotalCPS();
         updateUI();
         saveGame();
     }
@@ -234,10 +305,12 @@ function checkUpgradeUnlocks() {
 }
 
 elements.cookieBtn.addEventListener('click', (e) => {
-    state.cookies = state.cookies.plus(state.clickValue);
+    const clickGain = getEffectiveClickValue();
+    state.cookies = state.cookies.plus(clickGain);
+    state.lifetimeCookies = state.lifetimeCookies.plus(clickGain);
     updateUI();
     createParticle(e.clientX, e.clientY);
-    createFloatingText(e.clientX, e.clientY);
+    createFloatingText(e.clientX, e.clientY, clickGain);
 });
 
 function createParticle(x, y) {
@@ -255,10 +328,10 @@ function createParticle(x, y) {
     setTimeout(() => particle.remove(), 800);
 }
 
-function createFloatingText(x, y) {
+function createFloatingText(x, y, value) {
     const text = document.createElement('div');
     text.className = 'click-value-float';
-    text.innerText = `+${formatNumber(state.clickValue)}`;
+    text.innerText = `+${formatNumber(value)}`;
     text.style.left = `${x}px`;
     text.style.top = `${y}px`;
     document.body.appendChild(text);
@@ -307,6 +380,8 @@ elements.resetBtn.addEventListener('click', () => {
     }
 });
 
+elements.rebirthBtn.addEventListener('click', performRebirth);
+
 [elements.closeSave, elements.closeLoad].forEach(btn => {
     btn.addEventListener('click', () => {
         hideOverlay(elements.savePopup);
@@ -337,8 +412,10 @@ window.addEventListener('keydown', (e) => {
 setInterval(() => {
     const now = Date.now();
     const deltaTime = new Big(now - state.lastUpdate).div(1000);
-    if (state.totalCPS.gt(0)) {
-        state.cookies = state.cookies.plus(state.totalCPS.times(deltaTime));
+    if (getTotalCPS().gt(0)) {
+        const passiveGain = getTotalCPS().times(deltaTime);
+        state.cookies = state.cookies.plus(passiveGain);
+        state.lifetimeCookies = state.lifetimeCookies.plus(passiveGain);
         updateUI();
     }
     state.lastUpdate = now;

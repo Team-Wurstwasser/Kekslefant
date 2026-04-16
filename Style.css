@@ -37,6 +37,52 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
+.rebirth-panel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(61, 43, 31, 0.1);
+    border: 2px solid rgba(139, 69, 19, 0.4);
+    border-radius: 14px;
+    padding: 10px 12px;
+    backdrop-filter: blur(2px);
+}
+
+#rebirth-info {
+    font-weight: 700;
+    color: #4e342e;
+    white-space: nowrap;
+}
+
+.rebirth-btn {
+    position: relative;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    background: #8b4513;
+    box-shadow: 0 4px 0 #5d4037;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    cursor: pointer;
+    top: 0;
+}
+
+.rebirth-btn:active:not(:disabled) {
+    top: 2px;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+}
+
+.rebirth-btn:disabled {
+    background: #4a3b33;
+    box-shadow: 0 2px 0 #332822;
+    color: #888;
+    cursor: not-allowed;
+    top: 2px;
+    filter: grayscale(0.5);
+}
+
 #cookie-count-display {
     font-size: clamp(30px, 8vw, 50px);
     font-weight: 900;
@@ -449,6 +495,22 @@ body {
 
 @media (max-width: 800px) {
     #shop-toggle { display: flex; }
+
+    .rebirth-panel {
+        width: min(95vw, 380px);
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    #rebirth-info {
+        width: 100%;
+        text-align: center;
+    }
+
+    .rebirth-btn {
+        width: 100%;
+        justify-content: center;
+    }
 
     .sidebar {
         position: fixed;

@@ -263,3 +263,8 @@ const upgradeData = {
         desc: "Das Universum besteht nun zu 5% aus Keksteig. Alles x5."
     }
 };
+
+const rebirthConfig = {
+    baseCookies: new Big(1000000),
+    bonusPerPoint: new Big(0.05)
+};
