@@ -88,10 +88,6 @@ function getRebirthPoints() {
 
 function performRebirth() {
     const gain = getRebirthPoints();
-    if (gain.lte(0)) {
-        alert("Nicht genug Fortschritt für ein Rebirth.");
-        return;
-    }
 
     if (!confirm(`Wirklich Rebirth ausführen? Du erhältst +${gain.toString()} Rebirth-Punkte und setzt den normalen Fortschritt zurück.`)) {
         return;
