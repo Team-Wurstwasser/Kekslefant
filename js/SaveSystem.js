@@ -7,15 +7,15 @@ function getSaveData() {
             totalRebirths: state.totalRebirths.toString(),
             lifetimeCookies: state.lifetimeCookies.toString()
         },
-        factories: Object.keys(factoryList).reduce((all, key) => {
+        factories: Object.keys(factoryData).reduce((all, key) => {
             all[key] = {
-                a: factoryList[key].amount.toString(),
-                m: factoryList[key].multiplier.toString()
+                a: factoryData[key].amount.toString(),
+                m: factoryData[key].multiplier.toString()
             };
             return all;
         }, {}),
         upgrades: {
-            bought: Object.keys(upgradesList).filter(key => upgradesList[key].bought),
+            bought: Object.keys(upgradesData).filter(key => upgradesData[key].bought),
             visible: Array.from(visibleupgrades)
         }
     };
@@ -33,12 +33,12 @@ function applySaveData(data) {
 
         if (data.factories) {
             for (const key in data.factories) {
-                if (factoryList[key]) {
+                if (factoryData[key]) {
                     const fData = data.factories[key];
-                    factoryList[key].amount = new Big(fData.a || 0);
-                    factoryList[key].multiplier = new Big(fData.m || 1);
-                    factoryList[key].price = factoryList[key].basePrice.times(
-                        new Big(1.15).pow(parseInt(factoryList[key].amount.toString()))
+                    factoryData[key].amount = new Big(fData.a || 0);
+                    factoryData[key].multiplier = new Big(fData.m || 1);
+                    factoryData[key].price = factoryData[key].basePrice.times(
+                        new Big(1.15).pow(parseInt(factoryData[key].amount.toString()))
                     ).round(0, 0);
                 }
             }
@@ -46,8 +46,8 @@ function applySaveData(data) {
 
         if (data.upgrades?.bought) {
             data.upgrades.bought.forEach(key => {
-                if (upgradesList[key]) {
-                    upgradesList[key].bought = true;
+                if (upgradesData[key]) {
+                    upgradesData[key].bought = true;
                 }
             });
         }
@@ -55,7 +55,7 @@ function applySaveData(data) {
         visibleupgrades.clear();
         if (data.upgrades?.visible) {
             data.upgrades.visible.forEach(key => {
-                if (upgradesList[key] && !upgradesList[key].bought) {
+                if (upgradesData[key] && !upgradesData[key].bought) {
                     visibleupgrades.add(key);
                 }
             });
@@ -72,7 +72,7 @@ function saveGame() {
     if (isResetting) return;
 
     const hasNoCookies = state.cookies.eq(0);
-    const hasNoFactory = Object.values(factoryList).every(factory => factory.amount.eq(0));
+    const hasNoFactory = Object.values(factoryData).every(factory => factory.amount.eq(0));
     const hasNoRebirthProgress = !state.rebirthPoints || state.rebirthPoints.eq(0);
 
     if (hasNoCookies && hasNoFactory && hasNoRebirthProgress) {

@@ -12,8 +12,8 @@ const state = {
     lastUpdate: Date.now()
 };
 
-const factoryList = {};
-const upgradesList = {};
+const factoryData = {};
+const upgradesData = {};
 const visibleupgrades = new Set();
 let currentUpgradeToBuy = null;
 
@@ -98,14 +98,14 @@ function performRebirth() {
     state.cookies = new Big(0);
     state.clickValue = new Big(1);
 
-    for (const key in factoryList) {
-        factoryList[key].amount = new Big(0);
-        factoryList[key].multiplier = new Big(1);
-        factoryList[key].price = new Big(factoryList[key].basePrice);
+    for (const key in factoryData) {
+        factoryData[key].amount = new Big(0);
+        factoryData[key].multiplier = new Big(1);
+        factoryData[key].price = new Big(factoryData[key].basePrice);
     }
 
-    for (const key in upgradesList) {
-        const upg = upgradesList[key];
+    for (const key in upgradesData) {
+        const upg = upgradesData[key];
         upg.bought = false;
         if (upg.dom.btn) {
             upg.dom.btn.remove();
@@ -123,8 +123,8 @@ function performRebirth() {
 
 function getTotalCPS() {
     let total = new Big(0);
-    for (const key in factoryList) {
-        const item = factoryList[key];
+    for (const key in factoryData) {
+        const item = factoryData[key];
         total = total.plus(new Big(item.amount).times(item.cps).times(item.multiplier));
     }
     return total.times(getRebirthMultiplier());
@@ -149,8 +149,8 @@ function updateUI() {
     elements.rebirthBtn.innerText = `Rebirth (+${formatNumber(potentialGain)})`;
     elements.rebirthBtn.disabled = potentialGain.lte(0);
 
-    for (const key in factoryList) {
-        const upg = factoryList[key];
+    for (const key in factoryData) {
+        const upg = factoryData[key];
         const currentCPS = upg.cps.times(upg.multiplier).times(rebirthMultiplier);
 
         upg.dom.amount.innerText = formatNumber(upg.amount);
@@ -162,7 +162,7 @@ function updateUI() {
 }
 
 function buyFactory(key) {
-    const upg = factoryList[key];
+    const upg = factoryData[key];
     if (state.cookies.gte(upg.price)) {
         state.cookies = state.cookies.minus(upg.price);
         upg.amount = upg.amount.plus(1);
@@ -176,7 +176,7 @@ function buyFactory(key) {
 }
 
 function buyUpgrade(key) {
-    const spec = upgradesList[key];
+    const spec = upgradesData[key];
     if (state.cookies.gte(spec.price) && !spec.bought) {
         state.cookies = state.cookies.minus(spec.price);
         spec.bought = true;
@@ -194,12 +194,12 @@ function buyUpgrade(key) {
                 break;
 
             case "multiplier":
-                factoryList[spec.target].multiplier = factoryList[spec.target].multiplier.times(factor);
+                factoryData[spec.target].multiplier = factoryData[spec.target].multiplier.times(factor);
                 break;
 
             case "globalMultiplier":
-                Object.keys(factoryList).forEach(m => {
-                    factoryList[m].multiplier = factoryList[m].multiplier.times(factor);
+                Object.keys(factoryData).forEach(m => {
+                    factoryData[m].multiplier = factoryData[m].multiplier.times(factor);
                 });
                 break;
         }
@@ -219,7 +219,7 @@ function initShop() {
     const factoryContainer = document.getElementById('factory-list');
     factoryContainer.innerHTML = '';
 
-    for (const [key, data] of Object.entries(factoryData)) {
+    for (const [key, data] of Object.entries(factoryConfig)) {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'factory-item';
         itemDiv.innerHTML = `
@@ -241,7 +241,7 @@ function initShop() {
             </div>`;
 
         factoryContainer.appendChild(itemDiv);
-        factoryList[key] = {
+        factoryData[key] = {
             ...data,
             amount: new Big(0),
             price: new Big(data.basePrice),
@@ -253,13 +253,13 @@ function initShop() {
                 desc: itemDiv.querySelector('.factory-desc')
             }
         };
-        factoryList[key].dom.btn.addEventListener('click', () => buyFactory(key));
+        factoryData[key].dom.btn.addEventListener('click', () => buyFactory(key));
     }
 }
 
 function initUpgrades() {
-    for (const [key, data] of Object.entries(upgradeData)) {
-        upgradesList[key] = {
+    for (const [key, data] of Object.entries(upgradeConfig)) {
+        upgradesData[key] = {
             ...data,
             price: new Big(data.price),
             bought: false,
@@ -271,8 +271,8 @@ function initUpgrades() {
 function checkUpgradeUnlocks() {
     const upgradeContainer = document.getElementById('upgrade-list');
 
-    for (const key in upgradesList) {
-        const spec = upgradesList[key];
+    for (const key in upgradesData) {
+        const spec = upgradesData[key];
         
         if (spec.bought) continue;
 
@@ -387,7 +387,7 @@ elements.rebirthBtn.addEventListener('click', performRebirth);
 
 elements.closeUpgradePop.addEventListener('click', () => hideOverlay(elements.upgradePopup));
 elements.confirmUpgradeBuy.addEventListener('click', () => {
-    if (currentUpgradeToBuy && state.cookies.gte(upgradesList[currentUpgradeToBuy].price)) {
+    if (currentUpgradeToBuy && state.cookies.gte(upgradesData[currentUpgradeToBuy].price)) {
         buyUpgrade(currentUpgradeToBuy);
         hideOverlay(elements.upgradePopup);
         currentUpgradeToBuy = null;

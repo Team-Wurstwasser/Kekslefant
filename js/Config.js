@@ -1,4 +1,4 @@
-const factoryData = {
+const factoryConfig = {
     huette: {
         name: "Hefe Hütte",
         basePrice: new Big(15),
@@ -43,7 +43,7 @@ const factoryData = {
     }
 };
 
-const upgradeData = {
+const upgradeConfig = {
     click_1: {
         name: "Verstärkter Zeigefinger",
         type: "clickBoost",
