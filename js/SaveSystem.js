@@ -22,15 +22,51 @@ function getSaveData() {
     };
 }
 
+function calculateLifetimeCookiesFallback(data, currentCookies) {
+    let total = new Big(currentCookies || 0);
+    const growthFactor = new Big(1.15);
+
+    if (data?.factories) {
+        for (const key in data.factories) {
+            if (!factoryData[key]) continue;
+
+            const amount = parseInt(data.factories[key]?.a || 0, 10);
+            if (!Number.isFinite(amount) || amount <= 0) continue;
+
+            let nextPrice = new Big(factoryData[key].basePrice);
+            for (let i = 0; i < amount; i++) {
+                total = total.plus(nextPrice);
+                nextPrice = nextPrice.times(growthFactor).round(0, 0);
+            }
+        }
+    }
+
+    if (data?.upgrades?.bought) {
+        data.upgrades.bought.forEach(key => {
+            if (upgradeData[key]) {
+                total = total.plus(new Big(upgradeData[key].price));
+            }
+        });
+    }
+
+    return total;
+}
+
 function applySaveData(data) {
     if (!data) return;
 
     try {
-        state.cookies = new Big(data.stats?.cookies || 0);
+        const loadedCookies = new Big(data.stats?.cookies || 0);
+
+        state.cookies = loadedCookies;
         state.clickValue = new Big(data.stats?.clickValue || 1);
         state.rebirthPoints = new Big(data.stats?.rebirthPoints || 0);
         state.totalRebirths = new Big(data.stats?.totalRebirths || 0);
-        state.lifetimeCookies = new Big(data.stats?.lifetimeCookies || data.stats?.cookies || 0);
+        if (data.stats?.lifetimeCookies !== undefined && data.stats?.lifetimeCookies !== null) {
+            state.lifetimeCookies = new Big(data.stats.lifetimeCookies);
+        } else {
+            state.lifetimeCookies = calculateLifetimeCookiesFallback(data, loadedCookies);
+        }
         state.lifetimeRebirthPoints = new Big(data.stats?.lifetimeRebirthPoints || data.stats?.rebirthPoints || 0);
 
         if (data.factories) {
