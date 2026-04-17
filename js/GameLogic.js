@@ -13,7 +13,7 @@ const state = {
 };
 
 const factoryData = {};
-const upgradesData = {};
+const upgradeData = {};
 const visibleupgrades = new Set();
 let currentUpgradeToBuy = null;
 
@@ -104,8 +104,8 @@ function performRebirth() {
         factoryData[key].price = new Big(factoryData[key].basePrice);
     }
 
-    for (const key in upgradesData) {
-        const upg = upgradesData[key];
+    for (const key in upgradeData) {
+        const upg = upgradeData[key];
         upg.bought = false;
         if (upg.dom.btn) {
             upg.dom.btn.remove();
@@ -121,7 +121,7 @@ function performRebirth() {
     alert(`Rebirth abgeschlossen! +${gain.toString()} Punkte erhalten.`);
 }
 
-function getTotalCPS() {
+function getFactoryCPS() {
     let total = new Big(0);
     for (const key in factoryData) {
         const item = factoryData[key];
@@ -130,17 +130,17 @@ function getTotalCPS() {
     return total.times(getRebirthMultiplier());
 }
 
+function getClickValue() {
+    return state.clickValue.times(getRebirthMultiplier());
+}
+
 function getRebirthMultiplier() {
     return new Big(1).plus(state.rebirthPoints.times(rebirthConfig.bonusPerPoint));
 }
 
-function getEffectiveClickValue() {
-    return state.clickValue.times(getRebirthMultiplier());
-}
-
 function updateUI() {
     elements.cookieDisplay.innerText = formatNumber(state.cookies);
-    elements.cpsDisplay.innerText = formatPerSecond(getTotalCPS());
+    elements.cpsDisplay.innerText = formatPerSecond(getFactoryCPS());
     const rebirthMultiplier = getRebirthMultiplier();
 
     const rebirthBonusPercent = state.rebirthPoints.times(rebirthConfig.bonusPerPoint).times(100).round(0, 0);
@@ -176,7 +176,7 @@ function buyFactory(key) {
 }
 
 function buyUpgrade(key) {
-    const spec = upgradesData[key];
+    const spec = upgradeData[key];
     if (state.cookies.gte(spec.price) && !spec.bought) {
         state.cookies = state.cookies.minus(spec.price);
         spec.bought = true;
@@ -259,7 +259,7 @@ function initShop() {
 
 function initUpgrades() {
     for (const [key, data] of Object.entries(upgradeConfig)) {
-        upgradesData[key] = {
+        upgradeData[key] = {
             ...data,
             price: new Big(data.price),
             bought: false,
@@ -271,8 +271,8 @@ function initUpgrades() {
 function checkUpgradeUnlocks() {
     const upgradeContainer = document.getElementById('upgrade-list');
 
-    for (const key in upgradesData) {
-        const spec = upgradesData[key];
+    for (const key in upgradeData) {
+        const spec = upgradeData[key];
         
         if (spec.bought) continue;
 
@@ -301,7 +301,7 @@ function checkUpgradeUnlocks() {
 }
 
 elements.cookieBtn.addEventListener('click', (e) => {
-    const clickGain = getEffectiveClickValue();
+    const clickGain = getClickValue();
     state.cookies = state.cookies.plus(clickGain);
     state.lifetimeCookies = state.lifetimeCookies.plus(clickGain);
     updateUI();
@@ -387,7 +387,7 @@ elements.rebirthBtn.addEventListener('click', performRebirth);
 
 elements.closeUpgradePop.addEventListener('click', () => hideOverlay(elements.upgradePopup));
 elements.confirmUpgradeBuy.addEventListener('click', () => {
-    if (currentUpgradeToBuy && state.cookies.gte(upgradesData[currentUpgradeToBuy].price)) {
+    if (currentUpgradeToBuy && state.cookies.gte(upgradeData[currentUpgradeToBuy].price)) {
         buyUpgrade(currentUpgradeToBuy);
         hideOverlay(elements.upgradePopup);
         currentUpgradeToBuy = null;
@@ -408,8 +408,8 @@ window.addEventListener('keydown', (e) => {
 setInterval(() => {
     const now = Date.now();
     const deltaTime = new Big(now - state.lastUpdate).div(1000);
-    if (getTotalCPS().gt(0)) {
-        const passiveGain = getTotalCPS().times(deltaTime);
+    if (getFactoryCPS().gt(0)) {
+        const passiveGain = getFactoryCPS().times(deltaTime);
         state.cookies = state.cookies.plus(passiveGain);
         state.lifetimeCookies = state.lifetimeCookies.plus(passiveGain);
         updateUI();

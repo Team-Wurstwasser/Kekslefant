@@ -15,7 +15,7 @@ function getSaveData() {
             return all;
         }, {}),
         upgrades: {
-            bought: Object.keys(upgradesData).filter(key => upgradesData[key].bought),
+            bought: Object.keys(upgradeData).filter(key => upgradeData[key].bought),
             visible: Array.from(visibleupgrades)
         }
     };
@@ -46,8 +46,8 @@ function applySaveData(data) {
 
         if (data.upgrades?.bought) {
             data.upgrades.bought.forEach(key => {
-                if (upgradesData[key]) {
-                    upgradesData[key].bought = true;
+                if (upgradeData[key]) {
+                    upgradeData[key].bought = true;
                 }
             });
         }
@@ -55,13 +55,12 @@ function applySaveData(data) {
         visibleupgrades.clear();
         if (data.upgrades?.visible) {
             data.upgrades.visible.forEach(key => {
-                if (upgradesData[key] && !upgradesData[key].bought) {
+                if (upgradeData[key] && !upgradeData[key].bought) {
                     visibleupgrades.add(key);
                 }
             });
         }
 
-        calculateTotalCPS();
         updateUI();
     } catch (e) {
         console.error("Fehler beim Laden:", e);
