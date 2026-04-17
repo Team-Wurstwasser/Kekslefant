@@ -110,7 +110,7 @@ function saveGame() {
 
     const hasNoCookies = state.lifetimeCookies.eq(0);
     const hasNoFactory = Object.values(factoryData).every(factory => factory.amount.eq(0));
-    const hasNoRebirth = state.lifetimeRebirthsPoints.eq(0);
+    const hasNoRebirth = state.lifetimeRebirthPoints.eq(0);
 
     if (hasNoCookies && hasNoFactory && hasNoRebirth) {
         return; 
