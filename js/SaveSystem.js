@@ -5,7 +5,8 @@ function getSaveData() {
             clickValue: state.clickValue.toString(),
             rebirthPoints: state.rebirthPoints.toString(),
             totalRebirths: state.totalRebirths.toString(),
-            lifetimeCookies: state.lifetimeCookies.toString()
+            lifetimeCookies: state.lifetimeCookies.toString(),
+            lifetimeRebirthPoints: state.lifetimeRebirthPoints.toString()
         },
         factories: Object.keys(factoryData).reduce((all, key) => {
             all[key] = {
@@ -30,6 +31,7 @@ function applySaveData(data) {
         state.rebirthPoints = new Big(data.stats?.rebirthPoints || 0);
         state.totalRebirths = new Big(data.stats?.totalRebirths || 0);
         state.lifetimeCookies = new Big(data.stats?.lifetimeCookies || data.stats?.cookies || 0);
+        state.lifetimeRebirthPoints = new Big(data.stats?.lifetimeRebirthPoints || data.stats?.rebirthPoints || 0);
 
         if (data.factories) {
             for (const key in data.factories) {
@@ -70,11 +72,11 @@ function applySaveData(data) {
 function saveGame() {
     if (isResetting) return;
 
-    const hasNoCookies = state.cookies.eq(0);
+    const hasNoCookies = state.lifetimeCookies.eq(0);
     const hasNoFactory = Object.values(factoryData).every(factory => factory.amount.eq(0));
-    const hasNoRebirthProgress = !state.rebirthPoints || state.rebirthPoints.eq(0);
+    const hasNoRebirth = state.lifetimeRebirthsPoints.eq(0);
 
-    if (hasNoCookies && hasNoFactory && hasNoRebirthProgress) {
+    if (hasNoCookies && hasNoFactory && hasNoRebirth) {
         return; 
     }
 

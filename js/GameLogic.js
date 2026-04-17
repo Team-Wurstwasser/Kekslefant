@@ -8,6 +8,7 @@ const state = {
     rebirthPoints: new Big(0),
     totalRebirths: new Big(0),
     lifetimeCookies: new Big(0),
+    lifetimeRebirthPoints: new Big(0),
     isWurstMode: false,
     lastUpdate: Date.now()
 };
@@ -87,14 +88,15 @@ function getRebirthPoints() {
 }
 
 function performRebirth() {
-    const gain = getRebirthPoints();
+    const points = getRebirthPoints();
 
-    if (!confirm(`Wirklich Rebirth ausführen? Du erhältst +${gain.toString()} Rebirth-Punkte und setzt den normalen Fortschritt zurück.`)) {
+    if (!confirm(`Wirklich Rebirth ausführen? Du erhältst +${points.toString()} Rebirth-Punkte und setzt den normalen Fortschritt zurück.`)) {
         return;
     }
 
-    state.rebirthPoints = state.rebirthPoints.plus(gain);
+    state.rebirthPoints = state.rebirthPoints.plus(points);
     state.totalRebirths = state.totalRebirths.plus(1);
+    state.lifetimeRebirthPoints = state.lifetimeRebirthPoints.plus(points);
     state.cookies = new Big(0);
     state.clickValue = new Big(1);
 
@@ -116,9 +118,12 @@ function performRebirth() {
     visibleupgrades.clear();
     updateUI();
     saveGame();
-    hideOverlay(elements.settingsOverlay);
 
-    alert(`Rebirth abgeschlossen! +${gain.toString()} Punkte erhalten.`);
+    alert(`Rebirth abgeschlossen! +${points.toString()} Punkte erhalten.`);
+}
+
+function getRebirthMultiplier() {
+    return new Big(1).plus(state.rebirthPoints.times(rebirthConfig.bonusPerPoint));
 }
 
 function getFactoryCPS() {
@@ -132,10 +137,6 @@ function getFactoryCPS() {
 
 function getClickValue() {
     return state.clickValue.times(getRebirthMultiplier());
-}
-
-function getRebirthMultiplier() {
-    return new Big(1).plus(state.rebirthPoints.times(rebirthConfig.bonusPerPoint));
 }
 
 function updateUI() {
