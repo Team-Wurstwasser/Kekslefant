@@ -12,7 +12,7 @@ const state = {
 
 const factoryData = {
     huette: {
-        name: "Hefe Hütte",
+        name: "Keks Hütte",
         basePrice: new Big(15),
         cps: new Big(1),
         icon: "img/Huette.png"
