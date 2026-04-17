@@ -63,18 +63,18 @@ const upgradeConfig = {
     click_3: {
         name: "Diamant-Cursor",
         type: "clickMultiplier",
-        factor: new Big(5),
+        factor: new Big(100),
         price: new Big(2500000),
         icon: "img/Keks.svg",
-        desc: "Deine Klicks sind nun 5-mal so mächtig."
+        desc: "Deine Klicks sind nun 100-mal so mächtig."
     },
     click_4: {
         name: "Quanten-Clicker",
         type: "clickMultiplier",
-        factor: new Big(10),
+        factor: new Big(10000),
         price: new Big(1000000000),
         icon: "img/Keks.svg",
-        desc: "Ein Klick, tausend Realitäten. Klick-Wert x10."
+        desc: "Ein Klick, tausend Realitäten. Klick-Wert x10000."
     },
     huette_1: {
         name: "Bio-Hefe",
