@@ -77,22 +77,22 @@ const upgradeConfig = {
         desc: "Ein Klick, tausend Realitäten. Klick-Wert x10000."
     },
     huette_1: {
-        name: "Bio-Hefe",
+        name: "Bio-Kekseteig",
         type: "multiplier",
         target: "huette",
         price: new Big(500),
         factor: new Big(2),
         icon: "img/Huette.png",
-        desc: "Die Hefe-Hütten produzieren doppelt so schnell."
+        desc: "Die Keks-Hütten produzieren doppelt so schnell."
     },
     huette_2: {
-        name: "Hefe-Mutation",
+        name: "Keks-Mutation",
         type: "multiplier",
         target: "huette",
         price: new Big(15000),
         factor: new Big(4),
         icon: "img/Huette.png",
-        desc: "Die Hefe ist nun intelligent. Hütten produzieren 4-mal so viel."
+        desc: "Die Keks-Hütten sind nun intelligent. Hütten produzieren 4-mal so viel."
     },
     huette_3: {
         name: "Hütten-Automatik",
@@ -267,4 +267,137 @@ const upgradeConfig = {
 const rebirthConfig = {
     baseCookies: new Big(1000000),
     bonusPerPoint: new Big(0.05)
+};
+
+const rebirthTreeConfig = {
+    click_1: {
+        name: "Daumen-Training",
+        type: "clickFlat",
+        value: new Big(1),
+        cost: new Big(1),
+        tier: 1,
+        prereqs: [],
+        icon: "img/Keks.svg",
+        desc: "Jeder Klick bringt dauerhaft +1 extra Keks."
+    },
+    click_2: {
+        name: "Maus-Disziplin",
+        type: "clickMultiplier",
+        factor: new Big(2),
+        cost: new Big(2),
+        tier: 2,
+        prereqs: ["click_1"],
+        icon: "img/Keks.svg",
+        desc: "Verdoppelt den dauerhaften Klick-Bonus."
+    },
+    prod_1: {
+        name: "Back-Intuition",
+        type: "factoryMultiplier",
+        factor: new Big(1.25),
+        cost: new Big(1),
+        tier: 1,
+        prereqs: [],
+        icon: "img/Logo.png",
+        desc: "Alle Gebäude produzieren dauerhaft 25% mehr."
+    },
+    prod_2: {
+        name: "Keks-Synergie",
+        type: "factoryMultiplier",
+        factor: new Big(1.75),
+        cost: new Big(3),
+        tier: 2,
+        prereqs: ["prod_1"],
+        icon: "img/Logo.png",
+        desc: "Die Produktionsboni aller Gebäude werden weiter verstärkt."
+    },
+    core: {
+        name: "Wurstwasser-Kern",
+        type: "globalMultiplier",
+        factor: new Big(1.5),
+        cost: new Big(5),
+        tier: 3,
+        prereqs: ["click_2", "prod_2"],
+        icon: "img/Logo.png",
+        desc: "Alle dauerhaften Boni werden noch einmal um 50% verstärkt."
+    },
+    click_3: {
+        name: "Finger-Fokus",
+        type: "clickFlat",
+        value: new Big(5),
+        cost: new Big(4),
+        tier: 3,
+        prereqs: ["click_2"],
+        icon: "img/Keks.svg",
+        desc: "Jeder Klick gibt zusätzlich +5 Kekse."
+    },
+    prod_3: {
+        name: "Ofen-Orchester",
+        type: "factoryMultiplier",
+        factor: new Big(2),
+        cost: new Big(5),
+        tier: 3,
+        prereqs: ["prod_2"],
+        icon: "img/Logo.png",
+        desc: "Alle Gebaeude arbeiten im Takt und produzieren doppelt."
+    },
+    click_4: {
+        name: "Praezisionsklick",
+        type: "clickMultiplier",
+        factor: new Big(3),
+        cost: new Big(8),
+        tier: 4,
+        prereqs: ["click_3", "core"],
+        icon: "img/Keks.svg",
+        desc: "Verdreifacht den permanenten Klickwert."
+    },
+    prod_4: {
+        name: "Massenproduktion",
+        type: "factoryMultiplier",
+        factor: new Big(2.5),
+        cost: new Big(8),
+        tier: 4,
+        prereqs: ["prod_3", "core"],
+        icon: "img/Logo.png",
+        desc: "Ein grosser Produktionsschub fuer alle Gebaeude."
+    },
+    core_2: {
+        name: "Wurstkern-Reaktor",
+        type: "globalMultiplier",
+        factor: new Big(2),
+        cost: new Big(13),
+        tier: 5,
+        prereqs: ["click_4", "prod_4"],
+        icon: "img/Logo.png",
+        desc: "Verdoppelt alle permanenten Rebirth-Boni erneut."
+    },
+    click_5: {
+        name: "Hyper-Reflex",
+        type: "clickFlat",
+        value: new Big(25),
+        cost: new Big(21),
+        tier: 6,
+        prereqs: ["core_2"],
+        icon: "img/Keks.svg",
+        desc: "Jeder Klick erhaelt einen massiven +25 Bonus."
+    },
+    prod_5: {
+        name: "Endlos-Baeckerei",
+        type: "factoryMultiplier",
+        factor: new Big(4),
+        cost: new Big(21),
+        tier: 6,
+        prereqs: ["core_2"],
+        icon: "img/Logo.png",
+        desc: "Spiele mit voller Produktionskraft: x4 auf alle Gebaeude."
+    },
+    apex: {
+        name: "Keks-Apex",
+        type: "globalMultiplier",
+        factor: new Big(3),
+        cost: new Big(34),
+        tier: 7,
+        prereqs: ["click_5", "prod_5"],
+        icon: "img/Logo.png",
+        desc: "Der finale Knoten: verdreifacht Klick und Produktion dauerhaft."
+    }
 };

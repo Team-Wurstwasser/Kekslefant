@@ -2,7 +2,6 @@ function getSaveData() {
     return {
         stats: {
             cookies: state.cookies.toString(),
-            clickValue: state.clickValue.toString(),
             rebirthPoints: state.rebirthPoints.toString(),
             totalRebirths: state.totalRebirths.toString(),
             lifetimeCookies: state.lifetimeCookies.toString(),
@@ -10,14 +9,16 @@ function getSaveData() {
         },
         factories: Object.keys(factoryData).reduce((all, key) => {
             all[key] = {
-                a: factoryData[key].amount.toString(),
-                m: factoryData[key].multiplier.toString()
+                a: factoryData[key].amount.toString()
             };
             return all;
         }, {}),
         upgrades: {
             bought: Object.keys(upgradeData).filter(key => upgradeData[key].bought),
             visible: Array.from(visibleupgrades)
+        },
+        rebirthTree: {
+            bought: Object.keys(rebirthTreeData).filter(key => rebirthTreeData[key].bought)
         }
     };
 }
@@ -59,14 +60,10 @@ function applySaveData(data) {
         const loadedCookies = new Big(data.stats?.cookies || 0);
 
         state.cookies = loadedCookies;
-        state.clickValue = new Big(data.stats?.clickValue || 1);
+        state.clickValue = new Big(1);
         state.rebirthPoints = new Big(data.stats?.rebirthPoints || 0);
         state.totalRebirths = new Big(data.stats?.totalRebirths || 0);
-        if (data.stats?.lifetimeCookies !== undefined && data.stats?.lifetimeCookies !== null) {
-            state.lifetimeCookies = new Big(data.stats.lifetimeCookies);
-        } else {
-            state.lifetimeCookies = calculateLifetimeCookiesFallback(data, loadedCookies);
-        }
+        state.lifetimeCookies = (data.stats?.lifetimeCookies ?? null) !== null ? new Big(data.stats?.lifetimeCookies) : calculateLifetimeCookiesFallback(data, loadedCookies);
         state.lifetimeRebirthPoints = new Big(data.stats?.lifetimeRebirthPoints || data.stats?.rebirthPoints || 0);
 
         if (data.factories) {
@@ -74,7 +71,7 @@ function applySaveData(data) {
                 if (factoryData[key]) {
                     const fData = data.factories[key];
                     factoryData[key].amount = new Big(fData.a || 0);
-                    factoryData[key].multiplier = new Big(fData.m || 1);
+                    factoryData[key].multiplier = new Big(1);
                     factoryData[key].price = factoryData[key].basePrice.times(
                         new Big(1.15).pow(parseInt(factoryData[key].amount.toString()))
                     ).round(0, 0);
@@ -82,10 +79,26 @@ function applySaveData(data) {
             }
         }
 
+        for (const key in upgradeData) {
+            upgradeData[key].bought = false;
+        }
+
         if (data.upgrades?.bought) {
             data.upgrades.bought.forEach(key => {
                 if (upgradeData[key]) {
-                    upgradeData[key].bought = true;
+                    applyUpgrade(key, true);
+                }
+            });
+        }
+
+        for (const key in rebirthTreeData) {
+            rebirthTreeData[key].bought = false;
+        }
+
+        if (data.rebirthTree?.bought) {
+            data.rebirthTree.bought.forEach(key => {
+                if (rebirthTreeData[key]) {
+                    applyRebirth(key, true);
                 }
             });
         }
@@ -98,8 +111,6 @@ function applySaveData(data) {
                 }
             });
         }
-
-        updateUI();
     } catch (e) {
         console.error("Fehler beim Laden:", e);
     }

@@ -98,11 +98,32 @@
                 <div class="settings-content" style="text-align: center;">
                     <img id="up-pop-icon" src="" style="width: 64px; height: 64px; margin-bottom: 15px;">
                     <p id="up-pop-desc" style="color: #3d2b1f; margin-bottom: 10px;"></p>
-                    <p id="up-pop-price" style="font-weight: bold; font-size: 1.2em; color: #8b4513;"></p>
-                    <button id="confirm-upgrade-buy" class="factory-buy-btn" style="margin-top: 20px; justify-content: center;">
-                        Kaufen
+                    <button id="confirm-upgrade-buy" class="factory-buy-btn" style="margin-top: 20px;">
+                        <span class="buy-label">Kaufen</span>
+                        <span class="buy-price-wrapper">
+                            <span id="up-pop-price-btn">0</span>
+                            <img src="img/Keks.svg" class="factory-price-icon" alt="Cookie">
+                        </span>
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <div id="rebirth-tree-overlay" class="overlay">
+            <div class="settings-modal rebirth-tree-modal">
+                <div class="settings-header">
+                    <h2>Talentbaum</h2>
+                    <button id="close-rebirth-tree">
+                        <img src="img/Close.png" class="btn-icon">
+                    </button>
+                </div>
+
+                <div class="skill-tree-summary">
+                    <span id="rebirth-tree-points">Verfügbare Punkte: 0</span>
+                    <p>Die hier gekauften Talente bleiben für immer aktiv und überleben jeden Rebirth.</p>
+                </div>
+
+                <div id="rebirth-tree-list" class="skill-tree-list"></div>
             </div>
         </div>
 

@@ -1,0 +1,106 @@
+function initShop() {
+    elements.factoryContainer.innerHTML = '';
+
+    for (const [key, data] of Object.entries(factoryConfig)) {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'factory-item';
+        itemDiv.innerHTML = `
+            <div class="factory-info">
+                <img src="${data.icon}" alt="${data.name}" class="factory-icon">
+                <div class="factory-texts">
+                    <span class="factory-name">${data.name}</span>
+                    <span class="factory-desc"></span> </div>
+                <div class="factory-count-badge"><span class="factory-amount" id="${key}-amount">0</span></div>
+            </div>
+            <div class="factory-controls">
+                <button id="buy-${key}" class="factory-buy-btn">
+                    <span class="buy-label">Kaufen</span>
+                    <span class="buy-price-wrapper">
+                        <span id="${key}-price">${data.basePrice.toString()}</span> 
+                        <img src="img/Keks.svg" class="factory-price-icon">
+                    </span>
+                </button>
+            </div>`;
+
+        elements.factoryContainer.appendChild(itemDiv);
+        factoryData[key] = {
+            ...data,
+            amount: new Big(0),
+            price: new Big(data.basePrice),
+            multiplier: new Big(1),
+            dom: {
+                btn: document.getElementById(`buy-${key}`),
+                price: document.getElementById(`${key}-price`),
+                amount: document.getElementById(`${key}-amount`),
+                desc: itemDiv.querySelector('.factory-desc')
+            }
+        };
+        factoryData[key].dom.btn.addEventListener('click', () => buyFactory(key));
+    }
+}
+
+function initUpgrades() {
+    for (const [key, data] of Object.entries(upgradeConfig)) {
+        upgradeData[key] = {
+            ...data,
+            price: new Big(data.price),
+            bought: false,
+            dom: { btn: null }
+        };
+    }
+}
+
+function initRebirthTree() {
+    elements.rebirthTreeList.innerHTML = '';
+
+    for (const [key, data] of Object.entries(rebirthTreeConfig)) {
+        rebirthTreeData[key] = {
+            ...data,
+            cost: new Big(data.cost),
+            prereqs: Array.isArray(data.prereqs) ? [...data.prereqs] : [],
+            bought: false,
+            dom: {}
+        };
+    }
+
+    const tiers = new Map();
+    for (const [key, node] of Object.entries(rebirthTreeData)) {
+        if (!tiers.has(node.tier)) tiers.set(node.tier, []);
+        tiers.get(node.tier).push([key, node]);
+    }
+
+    Array.from(tiers.keys()).sort((a, b) => a - b).forEach(tier => {
+        const tierWrap = document.createElement('div');
+        tierWrap.className = 'skill-tree-tier';
+
+        const tierLabel = document.createElement('div');
+        tierLabel.className = 'skill-tree-tier-label';
+        tierLabel.innerText = `Stufe ${tier}`;
+        tierWrap.appendChild(tierLabel);
+
+        const tierRow = document.createElement('div');
+        tierRow.className = 'skill-tree-row';
+
+        tiers.get(tier).forEach(([key, node]) => {
+            const card = document.createElement('button');
+            card.className = 'skill-tree-node';
+            card.type = 'button';
+            card.innerHTML = `
+                <img src="${node.icon}" alt="${node.name}" class="skill-tree-icon">
+                <span class="skill-tree-name">${node.name}</span>
+                <span class="skill-tree-desc">${node.desc}</span>
+                <span class="skill-tree-status"></span>
+            `;
+
+            card.addEventListener('click', () => applyRebirth(key));
+            node.dom = {
+                btn: card,
+                status: card.querySelector('.skill-tree-status')
+            };
+            tierRow.appendChild(card);
+        });
+
+        tierWrap.appendChild(tierRow);
+        elements.rebirthTreeList.appendChild(tierWrap);
+    });
+}

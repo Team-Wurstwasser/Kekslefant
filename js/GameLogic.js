@@ -15,6 +15,7 @@ const state = {
 
 const factoryData = {};
 const upgradeData = {};
+const rebirthTreeData = {};
 const visibleupgrades = new Set();
 let currentUpgradeToBuy = null;
 
@@ -41,13 +42,19 @@ const elements = {
     closeLoad: document.getElementById('close-load'),
     rebirthInfo: document.getElementById('rebirth-info'),
     rebirthBtn: document.getElementById('rebirth-btn'),
+    rebirthTreeOverlay: document.getElementById('rebirth-tree-overlay'),
+    closeRebirthTree: document.getElementById('close-rebirth-tree'),
+    rebirthTreePoints: document.getElementById('rebirth-tree-points'),
+    rebirthTreeList: document.getElementById('rebirth-tree-list'),
     upgradePopup: document.getElementById('upgrade-popup'),
     closeUpgradePop: document.getElementById('close-upgrade-pop'),
     confirmUpgradeBuy: document.getElementById('confirm-upgrade-buy'),
     upPopName: document.getElementById('up-pop-name'),
     upPopIcon: document.getElementById('up-pop-icon'),
     upPopDesc: document.getElementById('up-pop-desc'),
-    upPopPrice: document.getElementById('up-pop-price')
+    upPopPriceBtn: document.getElementById('up-pop-price-btn'),
+    factoryContainer: document.getElementById('factory-list'),
+    upgradeContainer: document.getElementById('upgrade-list')
 };
 
 function formatNumber(num) {
@@ -72,7 +79,7 @@ function formatNumber(num) {
     return shortValue + " " + suffixes[suffixIndex];
 }
 
-function formatPerSecond(num) {
+function formatValue(num) {
     if (!(num instanceof Big)) num = new Big(num || 0);
 
     if (num.lt(1000)) {
@@ -84,7 +91,24 @@ function formatPerSecond(num) {
 
 function getRebirthPoints() {
     const RebirthPoints = state.lifetimeCookies.div(rebirthConfig.baseCookies).sqrt().round(0, 0);
-    return RebirthPoints.gt(state.rebirthPoints) ? RebirthPoints.minus(state.rebirthPoints) : new Big(0);
+    return RebirthPoints.gt(state.lifetimeRebirthPoints) ? RebirthPoints.minus(state.lifetimeRebirthPoints) : new Big(0);
+}
+
+function getRebirthMultiplier() {
+    return new Big(1).plus(state.lifetimeRebirthPoints.times(rebirthConfig.bonusPerPoint));
+}
+
+function getFactoryCPS() {
+    let total = new Big(0);
+    for (const key in factoryData) {
+        const item = factoryData[key];
+        total = total.plus(new Big(item.amount).times(item.cps).times(item.multiplier));
+    }
+    return total.times(getRebirthMultiplier());
+}
+
+function getClickValue() {
+    return state.clickValue.times(getRebirthMultiplier());
 }
 
 function performRebirth() {
@@ -118,35 +142,18 @@ function performRebirth() {
     visibleupgrades.clear();
     updateUI();
     saveGame();
-
-    alert(`Rebirth abgeschlossen! +${points.toString()} Punkte erhalten.`);
-}
-
-function getRebirthMultiplier() {
-    return new Big(1).plus(state.rebirthPoints.times(rebirthConfig.bonusPerPoint));
-}
-
-function getFactoryCPS() {
-    let total = new Big(0);
-    for (const key in factoryData) {
-        const item = factoryData[key];
-        total = total.plus(new Big(item.amount).times(item.cps).times(item.multiplier));
-    }
-    return total.times(getRebirthMultiplier());
-}
-
-function getClickValue() {
-    return state.clickValue.times(getRebirthMultiplier());
+    updateRebirthTree();
+    showOverlay(elements.rebirthTreeOverlay);
 }
 
 function updateUI() {
     elements.cookieDisplay.innerText = formatNumber(state.cookies);
-    elements.cpsDisplay.innerText = formatPerSecond(getFactoryCPS());
+    elements.cpsDisplay.innerText = formatValue(getFactoryCPS());
     const rebirthMultiplier = getRebirthMultiplier();
 
     const rebirthBonusPercent = state.rebirthPoints.times(rebirthConfig.bonusPerPoint).times(100).round(0, 0);
     const potentialGain = getRebirthPoints();
-    elements.rebirthInfo.innerText = `Rebirth: ${formatNumber(state.rebirthPoints)} Punkte (+${rebirthBonusPercent.toString()}%)`;
+    elements.rebirthInfo.innerText = `Rebirth: ${formatNumber(state.lifetimeRebirthPoints)} Punkte (+${rebirthBonusPercent.toString()}%)`;
     elements.rebirthBtn.innerText = `Rebirth (+${formatNumber(potentialGain)})`;
     elements.rebirthBtn.disabled = potentialGain.lte(0);
 
@@ -156,10 +163,67 @@ function updateUI() {
 
         upg.dom.amount.innerText = formatNumber(upg.amount);
         upg.dom.price.innerText = formatNumber(upg.price);
-        upg.dom.desc.innerText = `+${formatPerSecond(currentCPS)} Cookies/s`;
+        upg.dom.desc.innerText = `+${formatValue(currentCPS)} Cookies/s`;
         upg.dom.btn.disabled = state.cookies.lt(upg.price);
     }
+
+    if (elements.upgradePopup.style.display === 'flex') {
+        updateUpgradePopupButton();
+    }
     checkUpgradeUnlocks();
+}
+
+function updateUpgradePopupButton() {
+    const selectedUpgrade = currentUpgradeToBuy ? upgradeData[currentUpgradeToBuy] : null;
+    elements.confirmUpgradeBuy.disabled = !selectedUpgrade || state.cookies.lt(selectedUpgrade.price);
+}
+
+function updateRebirthTree() {
+    elements.rebirthTreePoints.innerText = `Verfügbare Punkte: ${formatNumber(state.rebirthPoints)}`;
+
+    for (const key in rebirthTreeData) {
+        const upg = rebirthTreeData[key];
+        if (!upg.dom?.btn) continue;
+
+        const prereqsMet = (upg.prereqs || []).every(reqKey => rebirthTreeData[reqKey]?.bought);
+        const canBuy = !upg.bought && prereqsMet && state.rebirthPoints.gte(upg.cost);
+
+        upg.dom.btn.classList.toggle('owned', upg.bought);
+        upg.dom.btn.classList.toggle('locked', !upg.bought && !prereqsMet);
+        upg.dom.btn.classList.toggle('available', canBuy);
+        upg.dom.btn.disabled = upg.bought || !prereqsMet || state.rebirthPoints.lt(upg.cost);
+        upg.dom.status.innerText = upg.bought ? 'Gekauft' : (prereqsMet ? `Kosten: ${formatNumber(upg.cost)}` : `Benötigt: ${upg.prereqs.map(req => rebirthTreeData[req]?.name).filter(Boolean).join(', ')}`);
+    }
+}
+
+function checkUpgradeUnlocks() {
+    for (const key in upgradeData) {
+        const upg = upgradeData[key];
+        
+        if (upg.bought) continue;
+
+        const shouldBeVisible = visibleupgrades.has(key) || state.cookies.gte(upg.price.times(0.8));
+
+        if (shouldBeVisible && !upg.dom.btn) {
+            const btn = document.createElement('button');
+            btn.className = 'upgrade-unlock-btn';
+            btn.innerHTML = `<img src="${upg.icon}" class="btn-icon">`;
+
+            elements.upgradeContainer.appendChild(btn);
+            visibleupgrades.add(key);
+            upg.dom.btn = btn;
+
+            btn.addEventListener('click', () => {
+                currentUpgradeToBuy = key;
+                elements.upPopName.innerText = upg.name;
+                elements.upPopIcon.src = upg.icon;
+                elements.upPopDesc.innerText = upg.desc;
+                elements.upPopPriceBtn.innerText = formatNumber(upg.price);
+                updateUpgradePopupButton();
+                showOverlay(elements.upgradePopup);
+            });
+        }
+    }
 }
 
 function buyFactory(key) {
@@ -176,128 +240,90 @@ function buyFactory(key) {
     }
 }
 
-function buyUpgrade(key) {
-    const spec = upgradeData[key];
-    if (state.cookies.gte(spec.price) && !spec.bought) {
-        state.cookies = state.cookies.minus(spec.price);
-        spec.bought = true;
+function applyUpgrade(key, restore = false) {
+    const upg = upgradeData[key];
+    if (!upg || upg.bought || (!restore && state.cookies.lt(upg.price))) return;
 
-        const factor = new Big(spec.factor || 2);
-        const boost = new Big(spec.boost || 1);
+    if (!restore) {
+        state.cookies = state.cookies.minus(upg.price);
+    }
 
-        switch (spec.type) {
-            case "clickBoost":
-                state.clickValue = state.clickValue.plus(boost);
-                break;
-            
-            case "clickMultiplier":
-                state.clickValue = state.clickValue.times(factor);
-                break;
+    upg.bought = true;
 
-            case "multiplier":
-                factoryData[spec.target].multiplier = factoryData[spec.target].multiplier.times(factor);
-                break;
+    const factor = new Big(upg.factor || 2);
+    const boost = new Big(upg.boost || 1);
 
-            case "globalMultiplier":
-                Object.keys(factoryData).forEach(m => {
-                    factoryData[m].multiplier = factoryData[m].multiplier.times(factor);
-                });
-                break;
-        }
+    switch (upg.type) {
+        case "clickBoost":
+            state.clickValue = state.clickValue.plus(boost);
+            break;
+        
+        case "clickMultiplier":
+            state.clickValue = state.clickValue.times(factor);
+            break;
 
-        if (spec.dom.btn) {
-            spec.dom.btn.remove();
-            spec.dom.btn = null;
-        }
-        visibleupgrades.delete(key);
+        case "multiplier":
+            factoryData[upg.target].multiplier = factoryData[upg.target].multiplier.times(factor);
+            break;
 
+        case "globalMultiplier":
+            Object.keys(factoryData).forEach(m => {
+                factoryData[m].multiplier = factoryData[m].multiplier.times(factor);
+            });
+            break;
+    }
+
+    if (upg.dom.btn) {
+        upg.dom.btn.remove();
+        upg.dom.btn = null;
+    }
+    visibleupgrades.delete(key);
+
+    if (!restore) {
         updateUI();
         saveGame();
     }
 }
 
-function initShop() {
-    const factoryContainer = document.getElementById('factory-list');
-    factoryContainer.innerHTML = '';
+function applyRebirth(key, restore = false) {
+    const rebirth = rebirthTreeData[key];
+    if (!rebirth || rebirth.bought || (!restore && !(rebirth.prereqs || []).every(reqKey => rebirthTreeData[reqKey]?.bought))) return;
 
-    for (const [key, data] of Object.entries(factoryConfig)) {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'factory-item';
-        itemDiv.innerHTML = `
-            <div class="factory-info">
-                <img src="${data.icon}" alt="${data.name}" class="factory-icon">
-                <div class="factory-texts">
-                    <span class="factory-name">${data.name}</span>
-                    <span class="factory-desc"></span> </div>
-                <div class="factory-count-badge"><span class="factory-amount" id="${key}-amount">0</span></div>
-            </div>
-            <div class="factory-controls">
-                <button id="buy-${key}" class="factory-buy-btn">
-                    <span class="buy-label">Kaufen</span>
-                    <span class="buy-price-wrapper">
-                        <span id="${key}-price">${data.basePrice.toString()}</span> 
-                        <img src="img/Keks.svg" class="factory-price-icon">
-                    </span>
-                </button>
-            </div>`;
+    if (!restore) {
+        if (state.rebirthPoints.lt(rebirth.cost)) return;
 
-        factoryContainer.appendChild(itemDiv);
-        factoryData[key] = {
-            ...data,
-            amount: new Big(0),
-            price: new Big(data.basePrice),
-            multiplier: new Big(1),
-            dom: {
-                btn: document.getElementById(`buy-${key}`),
-                price: document.getElementById(`${key}-price`),
-                amount: document.getElementById(`${key}-amount`),
-                desc: itemDiv.querySelector('.factory-desc')
-            }
-        };
-        factoryData[key].dom.btn.addEventListener('click', () => buyFactory(key));
+        state.rebirthPoints = state.rebirthPoints.minus(rebirth.cost);
     }
-}
 
-function initUpgrades() {
-    for (const [key, data] of Object.entries(upgradeConfig)) {
-        upgradeData[key] = {
-            ...data,
-            price: new Big(data.price),
-            bought: false,
-            dom: { btn: null }
-        };
-    }
-}
+    rebirth.bought = true;
 
-function checkUpgradeUnlocks() {
-    const upgradeContainer = document.getElementById('upgrade-list');
+    const factor = new Big(rebirth.factor || 1);
+    const value = new Big(rebirth.value || 0);
 
-    for (const key in upgradeData) {
-        const spec = upgradeData[key];
-        
-        if (spec.bought) continue;
-
-        const shouldBeVisible = visibleupgrades.has(key) || state.cookies.gte(spec.price.times(0.8));
-
-        if (shouldBeVisible && !spec.dom.btn) {
-            const btn = document.createElement('button');
-            btn.className = 'upgrade-unlock-btn';
-            btn.innerHTML = `<img src="${spec.icon}" class="btn-icon">`;
-
-            upgradeContainer.appendChild(btn);
-            visibleupgrades.add(key);
-            spec.dom.btn = btn;
-
-            btn.addEventListener('click', () => {
-                currentUpgradeToBuy = key;
-                elements.upPopName.innerText = spec.name;
-                elements.upPopIcon.src = spec.icon;
-                elements.upPopDesc.innerText = spec.desc;
-                elements.upPopPrice.innerText = `Preis: ${formatNumber(spec.price)} Cookies`;
-                elements.confirmUpgradeBuy.disabled = state.cookies.lt(spec.price);
-                showOverlay(elements.upgradePopup);
+    switch (rebirth.type) {
+        case "clickFlat":
+            state.clickValue = state.clickValue.plus(value);
+            break;
+        case "clickMultiplier":
+            state.clickValue = state.clickValue.times(factor);
+            break;
+        case "factoryMultiplier":
+            Object.keys(factoryData).forEach(key => {
+                factoryData[key].multiplier = factoryData[key].multiplier.times(factor);
             });
-        }
+            break;
+        case "globalMultiplier":
+            state.clickValue = state.clickValue.times(factor);
+            Object.keys(factoryData).forEach(key => {
+                factoryData[key].multiplier = factoryData[key].multiplier.times(factor);
+            });
+            break;
+    }
+
+    if (!restore) {
+        updateUI();
+        updateRebirthTree();
+        saveGame();
     }
 }
 
@@ -328,7 +354,7 @@ function createParticle(x, y) {
 function createFloatingText(x, y, value) {
     const text = document.createElement('div');
     text.className = 'click-value-float';
-    text.innerText = `+${formatNumber(value)}`;
+    text.innerText = `+${formatValue(value)}`;
     text.style.left = `${x}px`;
     text.style.top = `${y}px`;
     document.body.appendChild(text);
@@ -364,6 +390,7 @@ elements.confirmLoadBtn.addEventListener('click', () => {
         hideOverlay(elements.loadPopup);
         hideOverlay(elements.settingsOverlay);
         alert("Spielstand geladen!");
+        updateUI();
     } catch (e) {
         alert("Ungültiger Code!");
     }
@@ -386,10 +413,11 @@ elements.rebirthBtn.addEventListener('click', performRebirth);
     });
 });
 
+elements.closeRebirthTree.addEventListener('click', () => hideOverlay(elements.rebirthTreeOverlay));
 elements.closeUpgradePop.addEventListener('click', () => hideOverlay(elements.upgradePopup));
 elements.confirmUpgradeBuy.addEventListener('click', () => {
     if (currentUpgradeToBuy && state.cookies.gte(upgradeData[currentUpgradeToBuy].price)) {
-        buyUpgrade(currentUpgradeToBuy);
+        applyUpgrade(currentUpgradeToBuy);
         hideOverlay(elements.upgradePopup);
         currentUpgradeToBuy = null;
     }
@@ -423,5 +451,6 @@ window.addEventListener('beforeunload', saveGame);
 
 initShop();
 initUpgrades();
+initRebirthTree();
 loadGame();
 updateUI();
