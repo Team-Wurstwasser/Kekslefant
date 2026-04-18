@@ -25,9 +25,9 @@ function initShop() {
         elements.factoryContainer.appendChild(itemDiv);
         factoryData[key] = {
             ...data,
-            amount: new Big(0),
-            price: new Big(data.basePrice),
-            multiplier: new Big(1),
+            amount: new Decimal(0),
+            price: new Decimal(data.basePrice),
+            multiplier: new Decimal(1),
             dom: {
                 btn: document.getElementById(`buy-${key}`),
                 price: document.getElementById(`${key}-price`),
@@ -43,7 +43,7 @@ function initUpgrades() {
     for (const [key, data] of Object.entries(upgradeConfig)) {
         upgradeData[key] = {
             ...data,
-            price: new Big(data.price),
+            price: new Decimal(data.price),
             bought: false,
             dom: { btn: null }
         };
@@ -56,7 +56,7 @@ function initRebirthTree() {
     for (const [key, data] of Object.entries(rebirthTreeConfig)) {
         rebirthTreeData[key] = {
             ...data,
-            cost: new Big(data.cost),
+            cost: new Decimal(data.cost),
             prereqs: Array.isArray(data.prereqs) ? [...data.prereqs] : [],
             bought: false,
             dom: {}

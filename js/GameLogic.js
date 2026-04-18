@@ -3,12 +3,12 @@ let inputBuffer = "";
 const targetWord = "wurst";
 
 const state = {
-    cookies: new Big(0),
-    clickValue: new Big(1),
-    rebirthPoints: new Big(0),
-    totalRebirths: new Big(0),
-    lifetimeCookies: new Big(0),
-    lifetimeRebirthPoints: new Big(0),
+    cookies: new Decimal(0),
+    clickValue: new Decimal(1),
+    rebirthPoints: new Decimal(0),
+    totalRebirths: new Decimal(0),
+    lifetimeCookies: new Decimal(0),
+    lifetimeRebirthPoints: new Decimal(0),
     isWurstMode: false,
     lastUpdate: Date.now()
 };
@@ -58,7 +58,7 @@ const elements = {
 };
 
 function formatNumber(num) {
-    if (!(num instanceof Big)) num = new Big(num || 0);
+    if (!(num instanceof Decimal)) num = new Decimal(num || 0);
     if (num.lt(1000)) return num.toFixed(0);
 
     const suffixes = [
@@ -75,12 +75,12 @@ function formatNumber(num) {
         return num.toExponential(2).replace('+', '').replace('.', ',');
     }
 
-    const shortValue = num.div(new Big(10).pow(suffixIndex * 3)).toFixed(2).replace('.', ',');
+    const shortValue = num.div(new Decimal(10).pow(suffixIndex * 3)).toFixed(2).replace('.', ',');
     return shortValue + " " + suffixes[suffixIndex];
 }
 
 function formatValue(num) {
-    if (!(num instanceof Big)) num = new Big(num || 0);
+    if (!(num instanceof Decimal)) num = new Decimal(num || 0);
 
     if (num.lt(1000)) {
         return num.toFixed(2).replace('.', ',');
@@ -90,19 +90,19 @@ function formatValue(num) {
 }
 
 function getRebirthPoints() {
-    const RebirthPoints = state.lifetimeCookies.div(rebirthConfig.baseCookies).sqrt().round(0, 0);
-    return RebirthPoints.gt(state.lifetimeRebirthPoints) ? RebirthPoints.minus(state.lifetimeRebirthPoints) : new Big(0);
+    const totalPointsPossible = state.lifetimeCookies.div(rebirthConfig.baseCookies).log(10).div(new Decimal(rebirthConfig.pointsMultiplier).log(10)).floor();
+    return totalPointsPossible.gt(state.lifetimeRebirthPoints) ? totalPointsPossible.minus(state.lifetimeRebirthPoints)  : new Decimal(0);
 }
 
 function getRebirthMultiplier() {
-    return new Big(1).plus(state.lifetimeRebirthPoints.times(rebirthConfig.bonusPerPoint));
+    return new Decimal(1).plus(state.lifetimeRebirthPoints.times(rebirthConfig.bonusPerPoint));
 }
 
 function getFactoryCPS() {
-    let total = new Big(0);
+    let total = new Decimal(0);
     for (const key in factoryData) {
         const item = factoryData[key];
-        total = total.plus(new Big(item.amount).times(item.cps).times(item.multiplier));
+        total = total.plus(new Decimal(item.amount).times(item.cps).times(item.multiplier));
     }
     return total.times(getRebirthMultiplier());
 }
@@ -121,13 +121,13 @@ function performRebirth() {
     state.rebirthPoints = state.rebirthPoints.plus(points);
     state.totalRebirths = state.totalRebirths.plus(1);
     state.lifetimeRebirthPoints = state.lifetimeRebirthPoints.plus(points);
-    state.cookies = new Big(0);
-    state.clickValue = new Big(1);
+    state.cookies = new Decimal(0);
+    state.clickValue = new Decimal(1);
 
     for (const key in factoryData) {
-        factoryData[key].amount = new Big(0);
-        factoryData[key].multiplier = new Big(1);
-        factoryData[key].price = new Big(factoryData[key].basePrice);
+        factoryData[key].amount = new Decimal(0);
+        factoryData[key].multiplier = new Decimal(1);
+        factoryData[key].price = new Decimal(factoryData[key].basePrice);
     }
 
     for (const key in upgradeData) {
@@ -151,7 +151,7 @@ function updateUI() {
     elements.cpsDisplay.innerText = formatValue(getFactoryCPS());
     const rebirthMultiplier = getRebirthMultiplier();
 
-    const rebirthBonusPercent = state.rebirthPoints.times(rebirthConfig.bonusPerPoint).times(100).round(0, 0);
+    const rebirthBonusPercent = state.rebirthPoints.times(rebirthConfig.bonusPerPoint).times(100).toDecimalPlaces(0, Decimal.ROUND_DOWN);
     const potentialGain = getRebirthPoints();
     elements.rebirthInfo.innerText = `Rebirth: ${formatNumber(state.lifetimeRebirthPoints)} Punkte (+${rebirthBonusPercent.toString()}%)`;
     elements.rebirthBtn.innerText = `Rebirth (+${formatNumber(potentialGain)})`;
@@ -232,8 +232,8 @@ function buyFactory(key) {
         state.cookies = state.cookies.minus(upg.price);
         upg.amount = upg.amount.plus(1);
         upg.price = upg.basePrice.times(
-            new Big(1.15).pow(parseInt(upg.amount.toString()))
-        ).round(0, 0);
+            upg.priceMultiplier.pow(parseInt(upg.amount.toString()))
+        ).toDecimalPlaces(0, Decimal.ROUND_DOWN);
 
         updateUI();
         saveGame();
@@ -250,8 +250,8 @@ function applyUpgrade(key, restore = false) {
 
     upg.bought = true;
 
-    const factor = new Big(upg.factor || 2);
-    const boost = new Big(upg.boost || 1);
+    const factor = new Decimal(upg.factor || 2);
+    const boost = new Decimal(upg.boost || 1);
 
     switch (upg.type) {
         case "clickBoost":
@@ -297,8 +297,8 @@ function applyRebirth(key, restore = false) {
 
     rebirth.bought = true;
 
-    const factor = new Big(rebirth.factor || 1);
-    const value = new Big(rebirth.value || 0);
+    const factor = new Decimal(rebirth.factor || 1);
+    const value = new Decimal(rebirth.value || 0);
 
     switch (rebirth.type) {
         case "clickFlat":
@@ -436,7 +436,7 @@ window.addEventListener('keydown', (e) => {
 
 setInterval(() => {
     const now = Date.now();
-    const deltaTime = new Big(now - state.lastUpdate).div(1000);
+    const deltaTime = new Decimal(now - state.lastUpdate).div(1000);
     if (getFactoryCPS().gt(0)) {
         const passiveGain = getFactoryCPS().times(deltaTime);
         state.cookies = state.cookies.plus(passiveGain);
