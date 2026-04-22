@@ -197,8 +197,8 @@ function buyUpgrade(key) {
         state.cookies = state.cookies.minus(spec.price);
         spec.bought = true;
 
-        const factor = new Decimal(spec.factor);
-        const boost = new Decimal(spec.boost);
+        const factor = new Decimal(spec.factor || 1);
+        const boost = new Decimal(spec.boost || 0);
 
         switch (spec.type) {
             case "clickBoost":
