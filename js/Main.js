@@ -11,7 +11,7 @@ function loadScript(url) {
 
 async function initGame() {
     try {
-        await loadScript('js/Big.js');
+        await loadScript('js/Decimal.js');
         await loadScript('js/Config.js');
         await loadScript('js/SaveSystem.js');
         await loadScript('js/GameLogic.js');
