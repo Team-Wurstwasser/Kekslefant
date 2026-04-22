@@ -274,5 +274,5 @@ const upgradeConfig = {
 const rebirthConfig = {
     baseCookies: new Decimal(1000000),
     bonusPerPoint: new Decimal(0.05),
-    pointsMultiplier: new Decimal(1.15)
+    pointsMultiplier: new Decimal(2.15)
 };
