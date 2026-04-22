@@ -279,19 +279,29 @@ body {
 
 .factory-count-badge {
     background: rgba(0, 0, 0, 0.3);
-    min-width: 40px;
+    min-width: 72px;
+    max-width: 92px;
     height: 40px;
+    padding: 0 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 8px;
     border: 1px solid rgba(255, 215, 0, 0.2);
+    box-sizing: border-box;
 }
 
 .factory-amount {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     font-family: 'monospace';
-    font-size: 20px;
+    font-size: clamp(14px, 2vw, 20px);
     font-weight: bold;
+    line-height: 1;
+    letter-spacing: -0.02em;
     color: #ffd700;
     text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
