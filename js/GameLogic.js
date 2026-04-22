@@ -48,12 +48,13 @@ const elements = {
     upPopIcon: document.getElementById('up-pop-icon'),
     upPopDesc: document.getElementById('up-pop-desc'),
     upPopPriceBtn: document.getElementById('up-pop-price-btn'),
-    upgradeContainer: document.getElementById('upgrade-list')
+    upgradeContainer: document.getElementById('upgrade-list'),
+    factoryContainer: document.getElementById('factory-list')
 };
 
 function formatNumber(num) {
     if (!(num instanceof Decimal)) num = new Decimal(num || 0);
-    if (num.lt(1000)) return num.toFixed(0);
+    if (num.lt(1000)) return num.floor().toString();
 
     const suffixes = [
         "", "k", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", 
@@ -92,6 +93,23 @@ function getRebirthPoints() {
     return rebirthPoints.gt(0) ? rebirthPoints : new Decimal(0);
 }
 
+function getRebirthMultiplier() {
+    return new Decimal(1).plus(state.rebirthPoints.times(rebirthConfig.bonusPerPoint));
+}
+
+function getFactoryCPS() {
+    let total = new Decimal(0);
+    for (const key in factoryData) {
+        const item = factoryData[key];
+        total = total.plus(new Decimal(item.amount).times(item.cps).times(item.multiplier));
+    }
+    return total.times(getRebirthMultiplier());
+}
+
+function getClickValue() {
+    return state.clickValue.times(getRebirthMultiplier());
+}
+
 function performRebirth() {
     const points = getRebirthPoints();
 
@@ -127,23 +145,6 @@ function performRebirth() {
     alert(`Rebirth abgeschlossen! +${formatNumber(points)} Punkte erhalten.`);
 }
 
-function getRebirthMultiplier() {
-    return new Decimal(1).plus(state.rebirthPoints.times(rebirthConfig.bonusPerPoint));
-}
-
-function getFactoryCPS() {
-    let total = new Decimal(0);
-    for (const key in factoryData) {
-        const item = factoryData[key];
-        total = total.plus(new Decimal(item.amount).times(item.cps).times(item.multiplier));
-    }
-    return total.times(getRebirthMultiplier());
-}
-
-function getClickValue() {
-    return state.clickValue.times(getRebirthMultiplier());
-}
-
 function updateUI() {
     elements.cookieDisplay.innerText = formatNumber(state.cookies);
     elements.cpsDisplay.innerText = formatValue(getFactoryCPS());
@@ -177,113 +178,6 @@ function updateUpgradePopupButton() {
     elements.confirmUpgradeBuy.disabled = !selectedUpgrade || state.cookies.lt(selectedUpgrade.price);
 }
 
-function buyFactory(key) {
-    const upg = factoryData[key];
-    if (state.cookies.gte(upg.price)) {
-        state.cookies = state.cookies.minus(upg.price);
-        upg.amount = upg.amount.plus(1);
-        upg.price = upg.basePrice.times(
-            upg.priceMultiplier.pow(parseInt(upg.amount.toString()))
-        ).round(0, 0);
-
-        updateUI();
-        saveGame();
-    }
-}
-
-function buyUpgrade(key) {
-    const spec = upgradeData[key];
-    if (state.cookies.gte(spec.price) && !spec.bought) {
-        state.cookies = state.cookies.minus(spec.price);
-        spec.bought = true;
-
-        const factor = new Decimal(spec.factor || 1);
-        const boost = new Decimal(spec.boost || 0);
-
-        switch (spec.type) {
-            case "clickBoost":
-                state.clickValue = state.clickValue.plus(boost);
-                break;
-            
-            case "clickMultiplier":
-                state.clickValue = state.clickValue.times(factor);
-                break;
-
-            case "multiplier":
-                factoryData[spec.target].multiplier = factoryData[spec.target].multiplier.times(factor);
-                break;
-
-            case "globalMultiplier":
-                Object.keys(factoryData).forEach(m => {
-                    factoryData[m].multiplier = factoryData[m].multiplier.times(factor);
-                });
-                break;
-        }
-
-        if (spec.dom.btn) {
-            spec.dom.btn.remove();
-            spec.dom.btn = null;
-        }
-        visibleupgrades.delete(key);
-
-        updateUI();
-        saveGame();
-    }
-}
-
-function initShop() {
-    const factoryContainer = document.getElementById('factory-list');
-    factoryContainer.innerHTML = '';
-
-    for (const [key, data] of Object.entries(factoryConfig)) {
-        const itemDiv = document.createElement('div');
-        itemDiv.className = 'factory-item';
-        itemDiv.innerHTML = `
-            <div class="factory-info">
-                <img src="${data.icon}" alt="${data.name}" class="factory-icon">
-                <div class="factory-texts">
-                    <span class="factory-name">${data.name}</span>
-                    <span class="factory-desc"></span> </div>
-                <div class="factory-count-badge"><span class="factory-amount" id="${key}-amount">0</span></div>
-            </div>
-            <div class="factory-controls">
-                <button id="buy-${key}" class="factory-buy-btn">
-                    <span class="buy-label">Kaufen</span>
-                    <span class="buy-price-wrapper">
-                        <span id="${key}-price">${data.basePrice.toString()}</span> 
-                        <img src="img/Keks.svg" class="factory-price-icon">
-                    </span>
-                </button>
-            </div>`;
-
-        factoryContainer.appendChild(itemDiv);
-        factoryData[key] = {
-            ...data,
-            amount: new Decimal(0),
-            price: new Decimal(data.basePrice),
-            multiplier: new Decimal(1),
-            dom: {
-                btn: document.getElementById(`buy-${key}`),
-                price: document.getElementById(`${key}-price`),
-                amount: document.getElementById(`${key}-amount`),
-                desc: itemDiv.querySelector('.factory-desc')
-            }
-        };
-        factoryData[key].dom.btn.addEventListener('click', () => buyFactory(key));
-    }
-}
-
-function initUpgrades() {
-    for (const [key, data] of Object.entries(upgradeConfig)) {
-        upgradeData[key] = {
-            ...data,
-            price: new Decimal(data.price),
-            bought: false,
-            dom: { btn: null }
-        };
-    }
-}
-
 function checkUpgradeUnlocks() {
     for (const key in upgradeData) {
         const upg = upgradeData[key];
@@ -311,6 +205,65 @@ function checkUpgradeUnlocks() {
                 showOverlay(elements.upgradePopup);
             });
         }
+    }
+}
+
+function buyFactory(key) {
+    const upg = factoryData[key];
+    if (state.cookies.gte(upg.price)) {
+        state.cookies = state.cookies.minus(upg.price);
+        upg.amount = upg.amount.plus(1);
+        upg.price = upg.basePrice.times(
+            upg.priceMultiplier.pow(parseInt(upg.amount.toString()))
+        ).round(0, 0);
+
+        updateUI();
+        saveGame();
+    }
+}
+
+function applyUpgrade(key, restore = false) {
+    const upg = upgradeData[key];
+    if (!upg || upg.bought || (!restore && state.cookies.lt(upg.price))) return;
+
+    if (!restore) {
+        state.cookies = state.cookies.minus(upg.price);
+    }
+
+    upg.bought = true;
+
+    const factor = new Decimal(upg.factor || 2);
+    const boost = new Decimal(upg.boost || 1);
+
+    switch (upg.type) {
+        case "clickBoost":
+            state.clickValue = state.clickValue.plus(boost);
+            break;
+        
+        case "clickMultiplier":
+            state.clickValue = state.clickValue.times(factor);
+            break;
+
+        case "multiplier":
+            factoryData[upg.target].multiplier = factoryData[upg.target].multiplier.times(factor);
+            break;
+
+        case "globalMultiplier":
+            Object.keys(factoryData).forEach(m => {
+                factoryData[m].multiplier = factoryData[m].multiplier.times(factor);
+            });
+            break;
+    }
+
+    if (upg.dom.btn) {
+        upg.dom.btn.remove();
+        upg.dom.btn = null;
+    }
+    visibleupgrades.delete(key);
+
+    if (!restore) {
+        updateUI();
+        saveGame();
     }
 }
 
@@ -402,7 +355,7 @@ elements.rebirthBtn.addEventListener('click', performRebirth);
 elements.closeUpgradePop.addEventListener('click', () => hideOverlay(elements.upgradePopup));
 elements.confirmUpgradeBuy.addEventListener('click', () => {
     if (currentUpgradeToBuy && state.cookies.gte(upgradeData[currentUpgradeToBuy].price)) {
-        buyUpgrade(currentUpgradeToBuy);
+        applyUpgrade(currentUpgradeToBuy);
         hideOverlay(elements.upgradePopup);
         currentUpgradeToBuy = null;
     }

@@ -2,7 +2,6 @@ function getSaveData() {
     return {
         stats: {
             cookies: state.cookies.toString(),
-            clickValue: state.clickValue.toString(),
             rebirthPoints: state.rebirthPoints.toString(),
             totalRebirths: state.totalRebirths.toString(),
             lifetimeCookies: state.lifetimeCookies.toString(),
@@ -10,8 +9,7 @@ function getSaveData() {
         },
         factories: Object.keys(factoryData).reduce((all, key) => {
             all[key] = {
-                a: factoryData[key].amount.toString(),
-                m: factoryData[key].multiplier.toString()
+                amount: factoryData[key].amount.toString()
             };
             return all;
         }, {}),
@@ -30,7 +28,7 @@ function calculateLifetimeCookiesFallback(data, currentCookies) {
         for (const key in data.factories) {
             if (!factoryData[key]) continue;
 
-            const amount = parseInt(data.factories[key]?.a || 0, 10);
+            const amount = parseInt(data.factories[key]?.amount || 0, 10);
             if (!Number.isFinite(amount) || amount <= 0) continue;
 
             let nextPrice = new Decimal(factoryData[key].basePrice);
@@ -59,22 +57,18 @@ function applySaveData(data) {
         const loadedCookies = new Decimal(data.stats?.cookies || 0);
 
         state.cookies = loadedCookies;
-        state.clickValue = new Decimal(data.stats?.clickValue || 1);
+        state.clickValue = new Decimal(1);
         state.rebirthPoints = new Decimal(data.stats?.rebirthPoints || 0);
         state.totalRebirths = new Decimal(data.stats?.totalRebirths || 0);
-        if (data.stats?.lifetimeCookies !== undefined && data.stats?.lifetimeCookies !== null) {
-            state.lifetimeCookies = new Decimal(data.stats.lifetimeCookies);
-        } else {
-            state.lifetimeCookies = calculateLifetimeCookiesFallback(data, loadedCookies);
-        }
+        state.lifetimeCookies = (data.stats?.lifetimeCookies ?? null) !== null ? new Decimal(data.stats?.lifetimeCookies) : calculateLifetimeCookiesFallback(data, loadedCookies);
         state.lifetimeRebirthPoints = new Decimal(data.stats?.lifetimeRebirthPoints || data.stats?.rebirthPoints || 0);
 
         if (data.factories) {
             for (const key in data.factories) {
                 if (factoryData[key]) {
                     const fData = data.factories[key];
-                    factoryData[key].amount = new Decimal(fData.a || 0);
-                    factoryData[key].multiplier = new Decimal(fData.m || 1);
+                    factoryData[key].amount = new Decimal(fData.amount || 0);
+                    factoryData[key].multiplier = new Decimal(1);
                     factoryData[key].price = factoryData[key].basePrice.times(
                         new Decimal(1.15).pow(parseInt(factoryData[key].amount.toString()))
                     ).round(0, 0);
@@ -82,10 +76,14 @@ function applySaveData(data) {
             }
         }
 
+        for (const key in upgradeData) {
+            upgradeData[key].bought = false;
+        }
+
         if (data.upgrades?.bought) {
             data.upgrades.bought.forEach(key => {
                 if (upgradeData[key]) {
-                    upgradeData[key].bought = true;
+                    applyUpgrade(key, true);
                 }
             });
         }
@@ -98,8 +96,6 @@ function applySaveData(data) {
                 }
             });
         }
-
-        updateUI();
     } catch (e) {
         console.error("Fehler beim Laden:", e);
     }
