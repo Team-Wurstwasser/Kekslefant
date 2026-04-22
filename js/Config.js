@@ -83,6 +83,38 @@ const upgradeConfig = {
         icon: "img/Keks.svg",
         desc: "Ein Klick, tausend Realitäten. Klick-Wert x10000."
     },
+    click_5: {
+        name: "Wurst-Wasserdampf-Antrieb",
+        type: "clickMultiplier",
+        factor: new Decimal(10),
+        price: new Decimal(500000000),
+        icon: "img/Keks.svg",
+        desc: "Hochdruck-Dampf beschleunigt deine Finger. Klick-Wert x10."
+    },
+    click_6: {
+        name: "Galaktischer Zeigefinger",
+        type: "clickMultiplier",
+        factor: new Decimal(25),
+        price: new Decimal(10000000000),
+        icon: "img/Keks.svg",
+        desc: "Ein Klick, der ganze Galaxien erschüttert. Klick-Wert x25."
+    },
+    click_7: {
+        name: "Singularitäts-Tippen",
+        type: "clickMultiplier",
+        factor: new Decimal(50),
+        price: new Decimal(500000000000),
+        icon: "img/Keks.svg",
+        desc: "Bündle die Masse eines Schwarzen Lochs in deinem Finger. Klick-Wert x50."
+    },
+    click_8: {
+        name: "Dimensions-Glitch",
+        type: "clickMultiplier",
+        factor: new Decimal(100),
+        price: new Decimal(10000000000000),
+        icon: "img/Keks.svg",
+        desc: "Du klickst so schnell, dass das Spiel den Überblick verliert. Klick-Wert x100."
+    },
     huette_1: {
         name: "Bio-Keks",
         type: "multiplier",
@@ -205,7 +237,7 @@ const upgradeConfig = {
         type: "multiplier",
         target: "former",
         price: new Decimal(5000000000),
-        factor: new Decimal(4),
+        factor: new Decimal(15),
         icon: "img/Former.png",
         desc: "Die Formgebung ist nun 4-mal effizienter."
     },
