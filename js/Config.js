@@ -70,20 +70,12 @@ const upgradeConfig = {
     click_3: {
         name: "Diamant-Cursor",
         type: "clickMultiplier",
-        factor: new Decimal(100),
+        factor: new Decimal(10),
         price: new Decimal(2500000),
         icon: "img/Keks.svg",
         desc: "Deine Klicks sind nun 100-mal so mächtig."
     },
     click_4: {
-        name: "Quanten-Clicker",
-        type: "clickMultiplier",
-        factor: new Decimal(10000),
-        price: new Decimal(1000000000),
-        icon: "img/Keks.svg",
-        desc: "Ein Klick, tausend Realitäten. Klick-Wert x10000."
-    },
-    click_5: {
         name: "Wurst-Wasserdampf-Antrieb",
         type: "clickMultiplier",
         factor: new Decimal(10),
@@ -91,7 +83,7 @@ const upgradeConfig = {
         icon: "img/Keks.svg",
         desc: "Hochdruck-Dampf beschleunigt deine Finger. Klick-Wert x10."
     },
-    click_6: {
+    click_5: {
         name: "Galaktischer Zeigefinger",
         type: "clickMultiplier",
         factor: new Decimal(25),
@@ -99,19 +91,19 @@ const upgradeConfig = {
         icon: "img/Keks.svg",
         desc: "Ein Klick, der ganze Galaxien erschüttert. Klick-Wert x25."
     },
-    click_7: {
+    click_6: {
         name: "Singularitäts-Tippen",
         type: "clickMultiplier",
         factor: new Decimal(50),
-        price: new Decimal(500000000000),
+        price: new Decimal(5000000000000),
         icon: "img/Keks.svg",
         desc: "Bündle die Masse eines Schwarzen Lochs in deinem Finger. Klick-Wert x50."
     },
-    click_8: {
+    click_7: {
         name: "Dimensions-Glitch",
         type: "clickMultiplier",
         factor: new Decimal(100),
-        price: new Decimal(10000000000000),
+        price: new Decimal(1000000000000000),
         icon: "img/Keks.svg",
         desc: "Du klickst so schnell, dass das Spiel den Überblick verliert. Klick-Wert x100."
     },
@@ -306,5 +298,5 @@ const upgradeConfig = {
 const rebirthConfig = {
     baseCookies: new Decimal(1000000),
     bonusPerPoint: new Decimal(0.05),
-    pointsMultiplier: new Decimal(2.15)
+    pointsMultiplier: new Decimal(1.15)
 };
