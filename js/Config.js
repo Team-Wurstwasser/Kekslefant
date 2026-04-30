@@ -57,55 +57,71 @@ const upgradeConfig = {
         boost: new Decimal(1),
         price: new Decimal(50),
         icon: "img/Keks.svg",
-        desc: "Jeder Klick bringt +1 Keks mehr."
+        desc: "Jeder Klick bringt +{value} Keks{e} mehr."
     },
     click_2: {
         name: "Titan-Mausrad",
         type: "clickMultiplier",
         factor: new Decimal(2),
-        price: new Decimal(5000),
+        price: new Decimal(2500),
         icon: "img/Keks.svg",
         desc: "Verdoppelt die Effizienz deiner Klicks!"
     },
     click_3: {
-        name: "Diamant-Cursor",
+        name: "Präzisions-Cursor",
         type: "clickMultiplier",
-        factor: new Decimal(10),
-        price: new Decimal(2500000),
+        factor: new Decimal(2),
+        price: new Decimal(50000),
         icon: "img/Keks.svg",
-        desc: "Deine Klicks sind nun 100-mal so mächtig."
+        desc: "Verdoppelt die Klickkraft."
     },
     click_4: {
-        name: "Wurst-Wasserdampf-Antrieb",
+        name: "Verstärkte Maustaste",
         type: "clickMultiplier",
-        factor: new Decimal(10),
-        price: new Decimal(500000000),
+        factor: new Decimal(2),
+        price: new Decimal(10000000),
         icon: "img/Keks.svg",
-        desc: "Hochdruck-Dampf beschleunigt deine Finger. Klick-Wert x10."
+        desc: "Verdoppelt die Klickkraft."
     },
     click_5: {
-        name: "Galaktischer Zeigefinger",
+        name: "Reaktions-Trigger",
         type: "clickMultiplier",
-        factor: new Decimal(25),
-        price: new Decimal(10000000000),
+        factor: new Decimal(5),
+        price: new Decimal(250000000),
         icon: "img/Keks.svg",
-        desc: "Ein Klick, der ganze Galaxien erschüttert. Klick-Wert x25."
+        desc: "Verfünffacht die Effizienz deiner Klicks!"
     },
     click_6: {
-        name: "Singularitäts-Tippen",
+        name: "Hyper-Cursor",
         type: "clickMultiplier",
-        factor: new Decimal(50),
-        price: new Decimal(5000000000000),
+        factor: new Decimal(5),
+        price: new Decimal(7500000000),
         icon: "img/Keks.svg",
-        desc: "Bündle die Masse eines Schwarzen Lochs in deinem Finger. Klick-Wert x50."
+        desc: "Deine Klicks sind nun 5-mal so mächtig."
     },
     click_7: {
-        name: "Dimensions-Glitch",
+        name: "Impuls-Verstärker",
         type: "clickMultiplier",
-        factor: new Decimal(100),
+        factor: new Decimal(10),
+        price: new Decimal(150000000000),
+        icon: "img/Keks.svg",
+        desc: "Deine Klicks werden zehnmal stärker."
+    },
+    click_8: {
+        name: "Quanten-Treffer",
+        type: "clickMultiplier",
+        factor: new Decimal(10),
+        price: new Decimal(750000000000),
+        icon: "img/Keks.svg",
+        desc: "Deine Klicks werden zehnmal stärker."
+    },
+    click_9: {
+        name: "Kraft-Resonator",
+        type: "clickMultiplier",
+        factor: new Decimal(25),
         price: new Decimal(1000000000000000),
         icon: "img/Keks.svg",
-        desc: "Du klickst so schnell, dass das Spiel den Überblick verliert. Klick-Wert x100."
+        desc: "Deine Klicks sind nun 25-mal so mächtig."
     },
     huette_1: {
         name: "Bio-Keks",
@@ -129,7 +145,7 @@ const upgradeConfig = {
         name: "Hütten-Automatik",
         type: "multiplier",
         target: "huette",
-        price: new Decimal(1000000),
+        price: new Decimal(100000),
         factor: new Decimal(10),
         icon: "img/Huette.png",
         desc: "Vollautomatische Teigführung. Hütten x10."
@@ -258,7 +274,7 @@ const upgradeConfig = {
         price: new Decimal(50000000000),
         factor: new Decimal(2),
         icon: "img/Sonde.png",
-        desc: "Back-Sonden finden effizientere Routen im All (x2)."
+        desc: "Back-Sonden finden effizientere Routen im All x2."
     },
     sonde_2: {
         name: "Galaktisches Netzwerk",
