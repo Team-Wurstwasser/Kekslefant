@@ -109,10 +109,7 @@ function getFactoryCPS() {
 }
 
 function getClickValue() {
-    return state.clickValue
-        .plus(state.clickBonus)
-        .times(state.clickMultiplier)
-        .times(getRebirthMultiplier());
+    return state.clickValue.plus(state.clickBonus).times(state.clickMultiplier).times(getRebirthMultiplier());
 }
 
 function getUpgradeDescription(upg) {
