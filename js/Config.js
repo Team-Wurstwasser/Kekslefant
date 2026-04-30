@@ -68,44 +68,60 @@ const upgradeConfig = {
         desc: "Verdoppelt die Effizienz deiner Klicks!"
     },
     click_3: {
-        name: "Diamant-Cursor",
+        name: "Präzisions-Cursor",
         type: "clickMultiplier",
-        factor: new Decimal(10),
-        price: new Decimal(2500000),
+        factor: new Decimal(3),
+        price: new Decimal(25000),
         icon: "img/Keks.svg",
-        desc: "Deine Klicks sind nun 100-mal so mächtig."
+        desc: "Dreifacht die Klickkraft."
     },
     click_4: {
-        name: "Wurst-Wasserdampf-Antrieb",
+        name: "Verstärkte Maustaste",
         type: "clickMultiplier",
-        factor: new Decimal(10),
-        price: new Decimal(500000000),
+        factor: new Decimal(4),
+        price: new Decimal(1500000),
         icon: "img/Keks.svg",
-        desc: "Hochdruck-Dampf beschleunigt deine Finger. Klick-Wert x10."
+        desc: "Vervierfacht die Klickkraft."
     },
     click_5: {
-        name: "Galaktischer Zeigefinger",
+        name: "Reaktions-Trigger",
         type: "clickMultiplier",
-        factor: new Decimal(25),
-        price: new Decimal(10000000000),
+        factor: new Decimal(5),
+        price: new Decimal(7500000),
         icon: "img/Keks.svg",
-        desc: "Ein Klick, der ganze Galaxien erschüttert. Klick-Wert x25."
+        desc: "Fünffacht die Effizienz deiner Klicks!"
     },
     click_6: {
-        name: "Singularitäts-Tippen",
+        name: "Hyper-Cursor",
         type: "clickMultiplier",
-        factor: new Decimal(50),
-        price: new Decimal(5000000000000),
+        factor: new Decimal(8),
+        price: new Decimal(25000000),
         icon: "img/Keks.svg",
-        desc: "Bündle die Masse eines Schwarzen Lochs in deinem Finger. Klick-Wert x50."
+        desc: "Achtfacht die Klickkraft."
     },
     click_7: {
-        name: "Dimensions-Glitch",
+        name: "Kraft-Resonator",
         type: "clickMultiplier",
-        factor: new Decimal(100),
-        price: new Decimal(1000000000000000),
+        factor: new Decimal(10),
+        price: new Decimal(100000000),
         icon: "img/Keks.svg",
-        desc: "Du klickst so schnell, dass das Spiel den Überblick verliert. Klick-Wert x100."
+        desc: "Deine Klicks werden zehnmal stärker."
+    },
+    click_8: {
+        name: "Impuls-Verstärker",
+        type: "clickMultiplier",
+        factor: new Decimal(15),
+        price: new Decimal(500000000),
+        icon: "img/Keks.svg",
+        desc: "Deine Klicks werden 15-mal stärker."
+    },
+    click_9: {
+        name: "Quanten-Treffer",
+        type: "clickMultiplier",
+        factor: new Decimal(20),
+        price: new Decimal(2500000000),
+        icon: "img/Keks.svg",
+        desc: "Deine Klicks werden 20-mal stärker."
     },
     huette_1: {
         name: "Bio-Keks",

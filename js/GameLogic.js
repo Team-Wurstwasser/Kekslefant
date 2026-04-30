@@ -5,6 +5,8 @@ const targetWord = "wurst";
 const state = {
     cookies: new Decimal(0),
     clickValue: new Decimal(1),
+    clickBonus: new Decimal(0),
+    clickMultiplier: new Decimal(1),
     rebirthPoints: new Decimal(0),
     totalRebirths: new Decimal(0),
     lifetimeCookies: new Decimal(0),
@@ -107,7 +109,10 @@ function getFactoryCPS() {
 }
 
 function getClickValue() {
-    return state.clickValue.times(getRebirthMultiplier());
+    return state.clickValue
+        .plus(state.clickBonus)
+        .times(state.clickMultiplier)
+        .times(getRebirthMultiplier());
 }
 
 function performRebirth() {
@@ -122,6 +127,8 @@ function performRebirth() {
     state.lifetimeRebirthPoints = state.lifetimeRebirthPoints.plus(points);
     state.cookies = new Decimal(0);
     state.clickValue = new Decimal(1);
+    state.clickBonus = new Decimal(0);
+    state.clickMultiplier = new Decimal(1);
 
     for (const key in factoryData) {
         factoryData[key].amount = new Decimal(0);
@@ -237,11 +244,11 @@ function applyUpgrade(key, restore = false) {
 
     switch (upg.type) {
         case "clickBoost":
-            state.clickValue = state.clickValue.plus(boost);
+            state.clickBonus = state.clickBonus.plus(boost);
             break;
         
         case "clickMultiplier":
-            state.clickValue = state.clickValue.times(factor);
+            state.clickMultiplier = state.clickMultiplier.times(factor);
             break;
 
         case "multiplier":
@@ -252,6 +259,7 @@ function applyUpgrade(key, restore = false) {
             Object.keys(factoryData).forEach(m => {
                 factoryData[m].multiplier = factoryData[m].multiplier.times(factor);
             });
+            state.clickMultiplier = state.clickMultiplier.times(factor);
             break;
     }
 
