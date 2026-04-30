@@ -5,6 +5,8 @@ const targetWord = "wurst";
 const state = {
     cookies: new Decimal(0),
     clickValue: new Decimal(1),
+    clickBonus: new Decimal(0),
+    clickMultiplier: new Decimal(1),
     rebirthPoints: new Decimal(0),
     totalRebirths: new Decimal(0),
     lifetimeCookies: new Decimal(0),
@@ -107,7 +109,17 @@ function getFactoryCPS() {
 }
 
 function getClickValue() {
-    return state.clickValue.times(getRebirthMultiplier());
+    return state.clickValue.plus(state.clickBonus).times(state.clickMultiplier).times(getRebirthMultiplier());
+}
+
+function getUpgradeDescription(upg) {
+    if (upg.type === "clickBoost") {
+        const boost = new Decimal(upg.boost || 1).times(getRebirthMultiplier());
+        const pluralSuffix = boost.equals(1) ? "" : "e";
+        return upg.desc.replace("{value}", formatValue(boost)).replace("{e}", pluralSuffix);
+    }
+
+    return upg.desc;
 }
 
 function performRebirth() {
@@ -122,6 +134,8 @@ function performRebirth() {
     state.lifetimeRebirthPoints = state.lifetimeRebirthPoints.plus(points);
     state.cookies = new Decimal(0);
     state.clickValue = new Decimal(1);
+    state.clickBonus = new Decimal(0);
+    state.clickMultiplier = new Decimal(1);
 
     for (const key in factoryData) {
         factoryData[key].amount = new Decimal(0);
@@ -199,7 +213,7 @@ function checkUpgradeUnlocks() {
                 currentUpgradeToBuy = key;
                 elements.upPopName.innerText = upg.name;
                 elements.upPopIcon.src = upg.icon;
-                elements.upPopDesc.innerText = upg.desc;
+                elements.upPopDesc.innerText = getUpgradeDescription(upg);
                 elements.upPopPriceBtn.innerText = formatNumber(upg.price);
                 updateUpgradePopupButton();
                 showOverlay(elements.upgradePopup);
@@ -237,11 +251,11 @@ function applyUpgrade(key, restore = false) {
 
     switch (upg.type) {
         case "clickBoost":
-            state.clickValue = state.clickValue.plus(boost);
+            state.clickBonus = state.clickBonus.plus(boost);
             break;
         
         case "clickMultiplier":
-            state.clickValue = state.clickValue.times(factor);
+            state.clickMultiplier = state.clickMultiplier.times(factor);
             break;
 
         case "multiplier":
@@ -252,6 +266,7 @@ function applyUpgrade(key, restore = false) {
             Object.keys(factoryData).forEach(m => {
                 factoryData[m].multiplier = factoryData[m].multiplier.times(factor);
             });
+            state.clickMultiplier = state.clickMultiplier.times(factor);
             break;
     }
 

@@ -58,6 +58,8 @@ function applySaveData(data) {
 
         state.cookies = loadedCookies;
         state.clickValue = new Decimal(1);
+        state.clickBonus = new Decimal(0);
+        state.clickMultiplier = new Decimal(1);
         state.rebirthPoints = new Decimal(data.stats?.rebirthPoints || 0);
         state.totalRebirths = new Decimal(data.stats?.totalRebirths || 0);
         state.lifetimeCookies = (data.stats?.lifetimeCookies ?? null) !== null ? new Decimal(data.stats?.lifetimeCookies) : calculateLifetimeCookiesFallback(data, loadedCookies);
